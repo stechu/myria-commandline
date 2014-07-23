@@ -1,4 +1,4 @@
 myria-utilities
 ===============
 
-scripts used in Myria development
+Home brewed myria query authoring tool.
