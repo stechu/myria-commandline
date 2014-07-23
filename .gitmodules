@@ -1,3 +1,6 @@
 [submodule "raco"]
 	path = raco
 	url = https://github.com/uwescience/raco.git
+[submodule "myria"]
+	path = myria
+	url = https://github.com/uwescience/myria-python.git
