@@ -165,8 +165,15 @@ def experiment(filename):
         (queries.clique, 'clique'),
         (queries.fb_q4, 'fb_q4')
     ]
-    profilingModes = [('NONE',)]
-    phys_algebras = [('RS_HJ',), ('HC_LFJ',)]
+    profilingModes = [('ALL',)]
+    phys_algebras = [
+        ('RS_HJ',),
+        ('HC_HJ',),
+        ('BR_HJ',),
+        ('RS_LFJ',),
+        ('HC_LFJ',),
+        ('BR_LFJ',)
+    ]
     languages = [('myrial',)]
     exp_queries = itertools.product(
         languages, phys_algebras, profilingModes, exp_raw_queries)
