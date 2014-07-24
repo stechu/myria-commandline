@@ -2,6 +2,8 @@
 
 import queries
 import requests
+import csv
+import itertools
 
 from raco.language.myrialang import (MyriaLeftDeepTreeAlgebra,
                                      MyriaHyperCubeAlgebra,
@@ -25,15 +27,11 @@ import myria
 myrial_parser_lock = Lock()
 myrial_parser = MyrialParser.Parser()
 
-sleep_time = 1
-
-# a sequence of queries: [(language, query, phys_algebra, profilingMode), ... ]
-example_queries = [
-    ('MyriaL', queries.two_rings, 'ALL')
-    ]
-
 # need to be initiated
 connection = None
+
+# constants
+NANO_IN_ONE_SEC = 1000000000
 
 
 def get_plan(query, language, plan_type, connection,
@@ -124,7 +122,8 @@ class MyriaCatalog(Catalog):
 
 
 def execute_query(query):
-    language, query_str, phys_algebra, profilingMode = query
+    language, phys_algebra, profilingMode, query_str, query_name = query
+    print "executing query {}".format(query_name)
     if connection is None:
         raise Exception("connection is not initiated.")
     physical_algebra = get_physical_algebra(phys_algebra, connection)
@@ -139,12 +138,15 @@ def execute_query(query):
         # compile to json
         compiled = compile_to_json(
             query_str, logical_plan, physical_plan, language)
+        # execute the query util it is finished (or errored)
         query_status = connection.execute_query(compiled)
-        return query_status
+        return 'success', query_status
     except myria.MyriaError as e:
-        raise Exception(e)
+        print e
+        return 'fail', 'MyriaError'
     except requests.ConnectionError as e:
-        raise Exception(e)
+        print e
+        return 'fail', 'ConnectionError'
 
 
 def init_connection(hostname, port):
@@ -152,7 +154,42 @@ def init_connection(hostname, port):
     connection = myria.MyriaConnection(hostname=hostname, port=port)
 
 
+def experiment(filename):
+    exp_raw_queries = [
+        (queries.triangle, 'triangle'),
+        (queries.fb_q1, 'fb_q1'),
+        (queries.rectangle, 'rectangle'),
+        (queries.fb_q2, 'fb_q2'),
+        (queries.cocktail, 'cocktail'),
+        (queries.fb_q3, 'fb_q3'),
+        (queries.clique, 'clique'),
+        (queries.fb_q4, 'fb_q4')
+    ]
+    profilingModes = [('NONE',)]
+    phys_algebras = [('RS_HJ',), ('HC_LFJ',)]
+    languages = [('myrial',)]
+    exp_queries = itertools.product(
+        languages, phys_algebras, profilingModes, exp_raw_queries)
+    exp_queries = [
+        reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
+    with open(filename, "wb") as f:
+        writer = csv.writer(f)
+        writer.writerow(
+            ["name", "qid", "time", "algebra", "profilingMode", "success"])
+        for query in exp_queries:
+            # submit queries
+            result, status = execute_query(query)
+            _, algebra, profie, _, name = query
+            # log experiment result
+            if result == 'fail':
+                writer.writerow(
+                    [name, "N.A.", "N.A.", algebra, profie, "NO"])
+            elif result == 'success':
+                time = float(status["elapsedNanos"]) / NANO_IN_ONE_SEC
+                writer.writerow(
+                    [name, status["queryId"], time, algebra, profie, "YES"])
+
+
 if __name__ == '__main__':
     init_connection(hostname='dbserver02.cs.washington.edu', port=10032)
-    q1 = ('myrial', queries.triangle, 'RS_HJ', 'NONE')
-    execute_query(q1)
+    experiment("test.csv")

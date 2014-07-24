@@ -124,5 +124,20 @@ store(q3, fb_q3);
 '''
 
 fb_q4 = '''
-
+r1 = scan(actor_film); -- 1,100,844
+r2 = scan(actor_film); -- 1,100,844
+r3 = scan(perform_film); -- 1,094,294
+r4 = scan(perform_film); -- 1,094,294
+r5 = scan(director_film); -- 190,820
+r6 = scan(director_film); -- 190,820
+-- query(x) :- actor_film(x,y),actor_film(x,z),perfom_film(y,f1),perfrom_film(z,f1),director_film(d,f1),director_film(d,f2)
+query = [from  r1, r2, r3, r4, r5, r6
+         where r1.$0 = r2.$0 and
+               r1.$1 = r3.$0 and
+               r2.$1 = r4.$0 and
+               r3.$1 = r5.$1 and
+               r4.$1 = r6.$1 and
+               r3.$1 = r4.$1
+         emit r1.$0 as x];
+store(query, fb_q4);
 '''
