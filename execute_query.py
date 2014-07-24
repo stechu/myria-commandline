@@ -138,6 +138,7 @@ def execute_query(query):
         # compile to json
         compiled = compile_to_json(
             query_str, logical_plan, physical_plan, language)
+        compiled['profilingMode'] = profilingMode
         # execute the query util it is finished (or errored)
         query_status = connection.execute_query(compiled)
         return 'success', query_status
