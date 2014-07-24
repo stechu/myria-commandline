@@ -14,7 +14,7 @@ args = parser.parse_args()
 sleep_time = 1
 
 
-def execute(restURL):
+def execute_jsons(restURL):
     for idx, plan in enumerate(args.plans):
         # submit a query
         print "submitting {}".format(plan)
@@ -62,4 +62,4 @@ def getRestURL(configFilename):
 
 if __name__ == '__main__':
     print args.plans
-    execute(getRestURL(args.config))
+    execute_jsons(getRestURL(args.config))
