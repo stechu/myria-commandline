@@ -30,7 +30,9 @@ query = [from
          where R.$1 = S.$0 and
                S.$1 = T.$0 and
                T.$1 = S.$0 and
-               P.$0 = S.$0
+               P.$0 = S.$0 and
+               R.$0 < R.$1 and
+               S.$0 < S.$1
          emit R.$0 as x, S.$0 as y, S.$1 as z, P.$1 as p];
 store(query, cocktail);
 '''
@@ -44,7 +46,11 @@ query = [from R, R as S, R as T, R as P, R as K
              T.$1 = P.$0 and
              P.$1 = R.$0 and
              K.$0 = R.$0 and
-             K.$1 = T.$0
+             K.$1 = T.$0 and
+             R.$0 < R.$1 and
+             S.$0 < S.$1 and
+             T.$0 < T.$1 and
+             P.$0 > P.$1
         emit R.$0 as x, S.$0 as y, S.$1 as z, T.$1 as p];
 store(query, two_rings);
 '''
@@ -53,15 +59,19 @@ clique = '''
 R = scan(chushumo:multiway_join:twitter_1m);
 -- query(x,y,z,p):-R(x,y),S(y,z),T(z,p),P(p,x),K(x,z),L(y,p)
 query = [from R, R as S, R as T, R as P, R as K, R as L
-       where R.$1 = S.$0 and
+         where R.$1 = S.$0 and
              S.$1 = T.$0 and
              T.$1 = P.$0 and
              P.$1 = R.$0 and
              K.$0 = R.$0 and
              K.$1 = T.$0 and
              L.$0 = S.$1 and
-             L.$1 = P.$0
-        emit R.$0 as x, S.$0 as y, S.$1 as z, T.$1 as p];
+             L.$1 = P.$0 and
+             R.$0 < R.$1 and
+             S.$0 < S.$1 and
+             T.$0 < T.$1 and
+             P.$0 > P.$1
+         emit R.$0 as x, S.$0 as y, S.$1 as z, T.$1 as p];
 store(query, clique);
 '''
 

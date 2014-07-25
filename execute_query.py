@@ -174,33 +174,61 @@ def experiment(filename, exp_queries):
                     [name, status["queryId"], time, algebra, profie, "YES"])
 
 
+exp_raw_queries = [
+    (queries.triangle, 'triangle'),
+    (queries.fb_q1, 'fb_q1'),
+    (queries.rectangle, 'rectangle'),
+    (queries.fb_q2, 'fb_q2'),
+    (queries.two_rings, 'two_rings'),
+    (queries.fb_q3, 'fb_q3'),
+    (queries.clique, 'clique'),
+    (queries.fb_q4, 'fb_q4')
+]
+
+phys_algebras = [
+    ('RS_HJ',),
+    ('HC_HJ',),
+    ('BR_HJ',),
+    ('HC_LFJ',),
+    ('BR_LFJ',)
+]
+
+languages = [('myrial',)]
+
+
 # experiment 1:  resouce usage
 def resource_exp():
-    exp_raw_queries = [
-        (queries.triangle, 'triangle'),
-        (queries.fb_q1, 'fb_q1'),
-        (queries.rectangle, 'rectangle'),
-        (queries.fb_q2, 'fb_q2'),
-        (queries.cocktail, 'cocktail'),
-        (queries.fb_q3, 'fb_q3'),
-        (queries.clique, 'clique'),
-        (queries.fb_q4, 'fb_q4')
-    ]
     profilingModes = [('RESOURCE',)]
-    phys_algebras = [
-        ('RS_HJ',),
-        ('HC_HJ',),
-        ('BR_HJ',),
-        ('HC_LFJ',),
-        ('BR_LFJ',)
-    ]
-    languages = [('myrial',)]
     exp_queries = itertools.product(
         languages, phys_algebras, profilingModes, exp_raw_queries)
     exp_queries = [
         reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
     experiment("resource_exp.csv", exp_queries)
 
+
+# experiment 2: profile query execution only
+def profile_exp():
+    profilingModes = [('QUERY',)]
+    exp_queries = itertools.product(
+        languages, phys_algebras, profilingModes, exp_raw_queries)
+    exp_queries = [
+        reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
+    experiment("profile_exp.csv", exp_queries)
+
+
+# experiment 3: cold cache experiment
+def cold_cache_exp(filename):
+    profilingModes = [('NONE',)]
+    exp_queries = itertools.product(
+        languages, phys_algebras, profilingModes, exp_raw_queries)
+    exp_queries = [
+        reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
+    experiment(filename, exp_queries)
+
+
 if __name__ == '__main__':
     init_connection(hostname='dbserver02.cs.washington.edu', port=10032)
     resource_exp()
+    profile_exp()
+    cold_cache_exp("code_cache_1.csv")
+    cold_cache_exp("code_cache_2.csv")
