@@ -155,31 +155,7 @@ def init_connection(hostname, port):
     connection = myria.MyriaConnection(hostname=hostname, port=port)
 
 
-def experiment(filename):
-    exp_raw_queries = [
-        (queries.triangle, 'triangle'),
-        (queries.fb_q1, 'fb_q1'),
-        (queries.rectangle, 'rectangle'),
-        (queries.fb_q2, 'fb_q2'),
-        (queries.cocktail, 'cocktail'),
-        (queries.fb_q3, 'fb_q3'),
-        (queries.clique, 'clique'),
-        (queries.fb_q4, 'fb_q4')
-    ]
-    profilingModes = [('ALL',)]
-    phys_algebras = [
-        ('RS_HJ',),
-        ('HC_HJ',),
-        ('BR_HJ',),
-        ('RS_LFJ',),
-        ('HC_LFJ',),
-        ('BR_LFJ',)
-    ]
-    languages = [('myrial',)]
-    exp_queries = itertools.product(
-        languages, phys_algebras, profilingModes, exp_raw_queries)
-    exp_queries = [
-        reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
+def experiment(filename, exp_queries):
     with open(filename, "wb") as f:
         writer = csv.writer(f)
         writer.writerow(
@@ -198,6 +174,33 @@ def experiment(filename):
                     [name, status["queryId"], time, algebra, profie, "YES"])
 
 
+# experiment 1:  resouce usage
+def resource_exp():
+    exp_raw_queries = [
+        (queries.triangle, 'triangle'),
+        (queries.fb_q1, 'fb_q1'),
+        (queries.rectangle, 'rectangle'),
+        (queries.fb_q2, 'fb_q2'),
+        (queries.cocktail, 'cocktail'),
+        (queries.fb_q3, 'fb_q3'),
+        (queries.clique, 'clique'),
+        (queries.fb_q4, 'fb_q4')
+    ]
+    profilingModes = [('RESOURCE',)]
+    phys_algebras = [
+        ('RS_HJ',),
+        ('HC_HJ',),
+        ('BR_HJ',),
+        ('HC_LFJ',),
+        ('BR_LFJ',)
+    ]
+    languages = [('myrial',)]
+    exp_queries = itertools.product(
+        languages, phys_algebras, profilingModes, exp_raw_queries)
+    exp_queries = [
+        reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
+    experiment("resource_exp.csv", exp_queries)
+
 if __name__ == '__main__':
     init_connection(hostname='dbserver02.cs.washington.edu', port=10032)
-    experiment("test.csv")
+    resource_exp()
