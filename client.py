@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
-import queries
 import requests
-import csv
-import itertools
 
 from raco.language.myrialang import (MyriaLeftDeepTreeAlgebra,
                                      MyriaHyperCubeAlgebra,
@@ -127,7 +124,6 @@ def execute_query(query):
     if connection is None:
         raise Exception("connection is not initiated.")
     physical_algebra = get_physical_algebra(phys_algebra, connection)
-
     try:
         # Generate logical plan
         logical_plan = get_plan(
@@ -141,9 +137,12 @@ def execute_query(query):
         compiled['profilingMode'] = profilingMode
         # execute the query util it is finished (or errored)
         query_status = connection.execute_query(compiled)
-        return 'success', query_status
+        if query_status["status"] == 'SUCCESS':
+            return 'success', query_status
+        else:
+            return query_status["status"], query_status
     except myria.MyriaError as e:
-        print e
+        print "myrial error: {}".format(e)
         return 'fail', 'MyriaError'
     except requests.ConnectionError as e:
         print e
@@ -151,84 +150,5 @@ def execute_query(query):
 
 
 def init_connection(hostname, port):
-    global connection
-    connection = myria.MyriaConnection(hostname=hostname, port=port)
-
-
-def experiment(filename, exp_queries):
-    with open(filename, "wb") as f:
-        writer = csv.writer(f)
-        writer.writerow(
-            ["name", "qid", "time", "algebra", "profilingMode", "success"])
-        for query in exp_queries:
-            # submit queries
-            result, status = execute_query(query)
-            _, algebra, profie, _, name = query
-            # log experiment result
-            if result == 'fail':
-                writer.writerow(
-                    [name, "N.A.", "N.A.", algebra, profie, "NO"])
-            elif result == 'success':
-                time = float(status["elapsedNanos"]) / NANO_IN_ONE_SEC
-                writer.writerow(
-                    [name, status["queryId"], time, algebra, profie, "YES"])
-
-
-exp_raw_queries = [
-    (queries.triangle, 'triangle'),
-    (queries.fb_q1, 'fb_q1'),
-    (queries.rectangle, 'rectangle'),
-    (queries.fb_q2, 'fb_q2'),
-    (queries.two_rings, 'two_rings'),
-    (queries.fb_q3, 'fb_q3'),
-    (queries.clique, 'clique'),
-    (queries.fb_q4, 'fb_q4')
-]
-
-phys_algebras = [
-    ('RS_HJ',),
-    ('HC_HJ',),
-    ('BR_HJ',),
-    ('HC_LFJ',),
-    ('BR_LFJ',)
-]
-
-languages = [('myrial',)]
-
-
-# experiment 1:  resouce usage
-def resource_exp():
-    profilingModes = [('RESOURCE',)]
-    exp_queries = itertools.product(
-        languages, phys_algebras, profilingModes, exp_raw_queries)
-    exp_queries = [
-        reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
-    experiment("resource_exp.csv", exp_queries)
-
-
-# experiment 2: profile query execution only
-def profile_exp():
-    profilingModes = [('QUERY',)]
-    exp_queries = itertools.product(
-        languages, phys_algebras, profilingModes, exp_raw_queries)
-    exp_queries = [
-        reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
-    experiment("profile_exp.csv", exp_queries)
-
-
-# experiment 3: cold cache experiment
-def cold_cache_exp(filename):
-    profilingModes = [('NONE',)]
-    exp_queries = itertools.product(
-        languages, phys_algebras, profilingModes, exp_raw_queries)
-    exp_queries = [
-        reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
-    experiment(filename, exp_queries)
-
-
-if __name__ == '__main__':
-    init_connection(hostname='dbserver02.cs.washington.edu', port=10032)
-    resource_exp()
-    profile_exp()
-    cold_cache_exp("code_cache_1.csv")
-    cold_cache_exp("code_cache_2.csv")
+        global connection
+        connection = myria.MyriaConnection(hostname=hostname, port=port)
