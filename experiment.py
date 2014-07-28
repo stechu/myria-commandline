@@ -3,6 +3,7 @@ import csv
 import queries
 import itertools
 import numpy as np
+import subprocess
 
 hostname = "dbserver02.cs.washington.edu"
 port = "10032"
@@ -16,15 +17,39 @@ def experiment(filename, exp_queries):
         writer.writerow(
             ["name", "qid", "time", "algebra", "profilingMode", "success"])
         for query in exp_queries:
+            # stop the cluster
+            ret_code = subprocess.call([
+                "~/Project/myria/myriadeploy/stop_all_by_force.py",
+                "~/Project/myria/myriadeploy/deployment_pg_freebase.cfg"])
+            if ret_code:
+                raise Exception("Error when stoping cluster")
+            # clear the postgres cache
+            ret_code = subprocess.call([
+                "dsh",
+                "-g",
+                "64_node",
+                "-c",
+                "sync; sudo /etc/init.d/postgresql stop 9.1; sudo echo 3 | sudo tee /proc/sys/vm/drop_caches; sudo /etc/init.d/postgresql start 9.1"
+                ])
+            if ret_code:
+                raise Exception("Error when clear os caches")
+            # restart the cluster
+            ret_code = subprocess.call([
+                "~/Project/myria/myriadeploy/launch_cluster.sh",
+                "~/Project/myria/myriadeploy/deployment_pg_freebase.cfg"])
+            if ret_code:
+                raise Exception("Error happens when restart cluster")
             # submit queries
             result, status = client.execute_query(query)
             _, algebra, profie, _, name = query
             # log experiment result
             if result == 'success':
+                print "success"
                 time = float(status["elapsedNanos"]) / client.NANO_IN_ONE_SEC
                 writer.writerow(
                     [name, status["queryId"], time, algebra, profie, result])
             else:
+                print "error"
                 writer.writerow(
                     [name, "N.A.", "N.A.", algebra, profie, result])
 
@@ -110,6 +135,21 @@ def collect_network_data(queryId):
     return total_num_tuples, max(skews)
 
 
+def add_network_data(query_file, output_file):
+    with open(query_file, "rU") as f:
+        csvreader = csv.reader(f)
+        data = [r for r in csvreader]
+        data[0].extend(["shuffled tuples", "max skew"])
+        for i, row in enumerate(data):
+            if i != 0:
+                shuffled_tupels, max_skew = collect_network_data(row[1])
+                data[i].extend([shuffled_tupels, max_skew])
+
+    with open(output_file, "wb") as f:
+        csvwriter = csv.writer(f)
+        csvwriter.writerows(data)
+
+
 if __name__ == '__main__':
     #resource_exp()
     #profile_exp()
@@ -121,3 +161,6 @@ if __name__ == '__main__':
     #q = ('myrial', "RS_HJ", "NONE", queries.triangle, 'whatever')
     #execute_query(q)
     # collect_network_data(1031)
+    # add_network_data(
+    #    "/Users/chushumo/Project/papers/2014-multiwayjoin/profile_exp.csv",
+    #    "profile_extend.csv")
