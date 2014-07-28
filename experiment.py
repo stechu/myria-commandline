@@ -3,7 +3,7 @@ import csv
 import queries
 import itertools
 import numpy as np
-import subprocess
+from operator import itemgetter
 
 hostname = "dbserver02.cs.washington.edu"
 port = "10032"
@@ -17,28 +17,6 @@ def experiment(filename, exp_queries):
         writer.writerow(
             ["name", "qid", "time", "algebra", "profilingMode", "success"])
         for query in exp_queries:
-            # stop the cluster
-            ret_code = subprocess.call([
-                "~/Project/myria/myriadeploy/stop_all_by_force.py",
-                "~/Project/myria/myriadeploy/deployment_pg_freebase.cfg"])
-            if ret_code:
-                raise Exception("Error when stoping cluster")
-            # clear the postgres cache
-            ret_code = subprocess.call([
-                "dsh",
-                "-g",
-                "64_node",
-                "-c",
-                "sync; sudo /etc/init.d/postgresql stop 9.1; sudo echo 3 | sudo tee /proc/sys/vm/drop_caches; sudo /etc/init.d/postgresql start 9.1"
-                ])
-            if ret_code:
-                raise Exception("Error when clear os caches")
-            # restart the cluster
-            ret_code = subprocess.call([
-                "~/Project/myria/myriadeploy/launch_cluster.sh",
-                "~/Project/myria/myriadeploy/deployment_pg_freebase.cfg"])
-            if ret_code:
-                raise Exception("Error happens when restart cluster")
             # submit queries
             result, status = client.execute_query(query)
             _, algebra, profie, _, name = query
@@ -106,9 +84,20 @@ def cold_cache_exp(filename):
     experiment(filename, exp_queries)
 
 
-def collect_network_data(queryId):
+# experiment 4: regular shuffle with leapfrog join
+def cold_cache_rslfj_exp(filename):
+    profilingModes = [('NONE',)]
+    phys_algebras = [('RS_LFJ',)]
+    exp_queries = itertools.product(
+        languages, phys_algebras, profilingModes, exp_raw_queries)
+    exp_queries = [
+        reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
+    experiment(filename, exp_queries)
+
+
+def collect_network_data(query_id):
     """collect skew and """
-    send = list(client.connection.get_sent_logs(queryId))
+    send = list(client.connection.get_sent_logs(query_id))
     # sanitiy checking
     assert len(send[0]) == 4
     # remove header
@@ -150,14 +139,81 @@ def add_network_data(query_file, output_file):
         csvwriter.writerows(data)
 
 
+def collect_resource_data(query_id):
+    resource = list(client.connection.get_resource_log(query_id))
+    # remove header
+    resource = resource[1:]
+    # convert numeric fields to long
+    # row = [timestamp,opId,measurement,value,queryId,subqueryId,workerId]
+    resource = [
+        [long(row[0]),
+         long(row[1]),
+         row[2],
+         long(row[3]),
+         long(row[4]),
+         long(row[5]),
+         long(row[6])] for row in resource]
+    # filter out row with zero value
+    resource = filter(lambda row: row[3] != 0, resource)
+    # group by opId, measurement and worker
+    resource = sorted(resource, key=itemgetter(1, 2, 6))
+    resource = itertools.groupby(resource, key=itemgetter(1, 2, 6))
+    groups = []
+    for key, grp in resource:
+        groups.append([row for row in grp])
+    resource = [max(grp, key=itemgetter(0)) for grp in groups]
+    # store processed raw data as csv
+    with open("query_{}_resource.csv".format(query_id), "wb") as f:
+        csvwriter = csv.writer(f)
+        csvwriter.writerow(["opId", "measure", "value", "queryId", "workerId"])
+        for row in resource:
+            csvwriter.writerow([row[1], row[2], row[3], row[4], row[6]])
+    # group by measurement
+    resource = sorted(resource, key=itemgetter(2))
+    resource = itertools.groupby(resource, key=itemgetter(2))
+    groups = []
+    for key, grp in resource:
+        groups.append([row for row in grp])
+    result = []
+    for grp in groups:
+        values = [row[3] for row in grp]
+        result.append([grp[0][2], sum(values)])
+    cpu, hash_table_size = 0, 0
+    for measure, value in result:
+        if measure == 'cpuTotal':
+            cpu = value
+        elif measure == 'hashTableSize':
+            hash_table_size = value
+    return cpu, hash_table_size
+
+
+def add_resource_data(query_file, output_file):
+    with open(query_file, "rU") as f:
+        csvreader = csv.reader(f)
+        data = [r for r in csvreader]
+        data[0].extend(["cpu time", "hash table size"])
+        for i, row in enumerate(data):
+            if i != 0:
+                cpu, ht_size = collect_resource_data(row[1])
+                data[i].extend([cpu, ht_size])
+
+    with open(output_file, "wb") as f:
+        csvwriter = csv.writer(f)
+        csvwriter.writerows(data)
+
+
 if __name__ == '__main__':
     #resource_exp()
     #profile_exp()
-    cold_cache_exp("cold_cache_1.csv")
-    cold_cache_exp("cold_cache_2.csv")
-    cold_cache_exp("cold_cache_3.csv")
-    cold_cache_exp("cold_cache_4.csv")
-    cold_cache_exp("cold_cache_5.csv")
+    #cold_cache_exp("cold_cache_1.csv")
+    #cold_cache_exp("cold_cache_2.csv")
+    #cold_cache_exp("cold_cache_3.csv")
+    #cold_cache_exp("cold_cache_4.csv")
+    #cold_cache_exp("cold_cache_5.csv")
+    cold_cache_rslfj_exp("cold_cache_rslfj.csv")
+    #add_resource_data(
+    #    "/Users/chushumo/Project/papers/2014-multiwayjoin/resource_exp.csv",
+    #    "resource_extend.csv")
     #q = ('myrial', "RS_HJ", "NONE", queries.triangle, 'whatever')
     #execute_query(q)
     # collect_network_data(1031)
