@@ -95,6 +95,28 @@ def cold_cache_rslfj_exp(filename):
     experiment(filename, exp_queries)
 
 
+# experiment 5: rs lfj profile
+def profile_rslfj(filename):
+    profilingModes = [('QUERY',)]
+    phys_algebras = [('RS_LFJ',)]
+    exp_queries = itertools.product(
+        languages, phys_algebras, profilingModes, exp_raw_queries)
+    exp_queries = [
+        reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
+    experiment(filename, exp_queries)
+
+
+# experiment 6: rs lfj resource
+def resource_rslfj(filename):
+    profilingModes = [('RESOURCE',)]
+    phys_algebras = [('RS_LFJ',)]
+    exp_queries = itertools.product(
+        languages, phys_algebras, profilingModes, exp_raw_queries)
+    exp_queries = [
+        reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
+    experiment(filename, exp_queries)
+
+
 def collect_network_data(query_id):
     """collect skew and """
     send = list(client.connection.get_sent_logs(query_id))
@@ -210,7 +232,9 @@ if __name__ == '__main__':
     #cold_cache_exp("cold_cache_3.csv")
     #cold_cache_exp("cold_cache_4.csv")
     #cold_cache_exp("cold_cache_5.csv")
-    cold_cache_rslfj_exp("cold_cache_rslfj.csv")
+    #cold_cache_rslfj_exp("cold_cache_rslfj.csv")
+    profile_rslfj("profile_rslfj.csv")
+    resource_rslfj("resource_rslfj.csv")
     #add_resource_data(
     #    "/Users/chushumo/Project/papers/2014-multiwayjoin/resource_exp.csv",
     #    "resource_extend.csv")
