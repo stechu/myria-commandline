@@ -46,14 +46,14 @@ small_set_queries = [
     (queries.triangle, 'triangle'),
     (queries.fb_q1, 'fb_q1'),
     (queries.clique, 'clique'),
-    (queries.fb_q5, 'fb_q5'),
+    (queries.fb_q5, 'fb_q5')
 ]
 
 phys_algebras = [
     ('RS_HJ',),
     ('HC_HJ',),
     ('BR_HJ',),
-    ('RS_LFJ'),
+    ('RS_LFJ',),
     ('HC_LFJ',),
     ('BR_LFJ',)
 ]
