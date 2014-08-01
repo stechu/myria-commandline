@@ -75,10 +75,10 @@ def resource_exp():
 def profile_exp():
     profilingModes = [('QUERY',)]
     exp_queries = itertools.product(
-        languages, phys_algebras, profilingModes, exp_raw_queries)
+        languages, phys_algebras, profilingModes, small_set_queries)
     exp_queries = [
         reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
-    experiment("profile_exp.csv", exp_queries)
+    experiment("profile_exp_31_july.csv", exp_queries)
 
 
 # experiment 3: cold cache experiment
@@ -242,8 +242,8 @@ def add_resource_data(query_file, output_file):
 
 
 if __name__ == '__main__':
-    resource_exp()
-    #profile_exp()
+    #resource_exp()
+    profile_exp()
     #cold_cache_exp("cold_cache_1.csv")
     #cold_cache_exp("cold_cache_2.csv")
     #cold_cache_exp("cold_cache_3.csv")
