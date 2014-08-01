@@ -2,7 +2,6 @@ import client
 import csv
 import queries
 import itertools
-import numpy as np
 from operator import itemgetter
 
 hostname = "dbserver02.cs.washington.edu"
@@ -43,10 +42,18 @@ exp_raw_queries = [
     (queries.fb_q4, 'fb_q4')
 ]
 
+small_set_queries = [
+    (queries.triangle, 'triangle'),
+    (queries.fb_q1, 'fb_q1'),
+    (queries.clique, 'clique'),
+    (queries.fb_q5, 'fb_q5'),
+]
+
 phys_algebras = [
     ('RS_HJ',),
     ('HC_HJ',),
     ('BR_HJ',),
+    ('RS_LFJ'),
     ('HC_LFJ',),
     ('BR_LFJ',)
 ]
@@ -58,10 +65,10 @@ languages = [('myrial',)]
 def resource_exp():
     profilingModes = [('RESOURCE',)]
     exp_queries = itertools.product(
-        languages, phys_algebras, profilingModes, exp_raw_queries)
+        languages, phys_algebras, profilingModes, small_set_queries)
     exp_queries = [
         reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
-    experiment("resource_exp.csv", exp_queries)
+    experiment("resource_exp_31_july.csv", exp_queries)
 
 
 # experiment 2: profile query execution only
@@ -138,11 +145,21 @@ def collect_network_data(query_id):
 
     # compute skew per group
     def compute_skew(group):
-        data = [r[3] for r in group]
-        skew = np.max(data)/np.mean(data)
+        # group by destination
+        received = sorted(group, key=itemgetter(2))
+        received = itertools.groupby(received, key=itemgetter(2))
+        r_groups = []
+        for r_wid, grp in received:
+            r_groups.append([r[3] for r in grp])
+        data = [sum(grp) for grp in r_groups]
+        skew = max(data)/(sum(data)/64.0)
+        # if the data is not significant, ignore it
+        if sum(data) < total_num_tuples/64:
+            skew = 1
         return skew
     skews = map(compute_skew, groups)
     # return number of tuples being shuffled, and max skew
+    print skews
     return total_num_tuples, max(skews)
 
 
@@ -225,7 +242,7 @@ def add_resource_data(query_file, output_file):
 
 
 if __name__ == '__main__':
-    #resource_exp()
+    resource_exp()
     #profile_exp()
     #cold_cache_exp("cold_cache_1.csv")
     #cold_cache_exp("cold_cache_2.csv")
@@ -233,14 +250,17 @@ if __name__ == '__main__':
     #cold_cache_exp("cold_cache_4.csv")
     #cold_cache_exp("cold_cache_5.csv")
     #cold_cache_rslfj_exp("cold_cache_rslfj.csv")
-    profile_rslfj("profile_rslfj.csv")
-    resource_rslfj("resource_rslfj.csv")
+    #profile_rslfj("profile_rslfj.csv")
+    #resource_rslfj("resource_rslfj.csv")
     #add_resource_data(
-    #    "/Users/chushumo/Project/papers/2014-multiwayjoin/resource_exp.csv",
-    #    "resource_extend.csv")
+    #    "/Users/chushumo/Project/papers/2014-multiwayjoin/resource_rslfj.csv",
+    #    "resource_rslfj_extend.csv")
     #q = ('myrial', "RS_HJ", "NONE", queries.triangle, 'whatever')
     #execute_query(q)
-    # collect_network_data(1031)
+    #collect_network_data(1992)
     # add_network_data(
+    #    "/Users/chushumo/Project/papers/2014-multiwayjoin/profile_rslfj.csv",
+    #    "profile_rslfj_extend_30_july.csv")
+    #add_network_data(
     #    "/Users/chushumo/Project/papers/2014-multiwayjoin/profile_exp.csv",
-    #    "profile_extend.csv")
+    #    "profile_extend_30_july.csv")
