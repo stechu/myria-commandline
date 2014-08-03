@@ -8,12 +8,11 @@ query = [from R, R as S, R as T
              S.$1 = T.$0 and
              T.$1 = R.$0
        emit R.$0 as x, S.$0 as y, S.$1 as z];
-store(query, triangle);
 '''
 
 rectangle = '''
 R = scan(chushumo:multiway_join:twitter_1m);
-rec = [from R, R as S, R as T, R as P
+query = [from R, R as S, R as T, R as P
        where R.$1 = S.$0 and
              S.$1 = T.$0 and
              T.$1 = P.$0 and
@@ -55,7 +54,7 @@ query = [from R, R as S, R as T, R as P, R as K
 clique = '''
 R = scan(chushumo:multiway_join:twitter_1m);
 -- query(x,y,z,p):-R(x,y),S(y,z),T(z,p),P(p,x),K(x,z),L(y,p)
-query = [from R, R as K, R as S, R as T, R as P,  R as L
+query = [from R, R as S, R as T, R as P, R as K, R as L
          where R.$1 = S.$0 and
              S.$1 = T.$0 and
              T.$1 = P.$0 and
@@ -69,7 +68,6 @@ query = [from R, R as K, R as S, R as T, R as P,  R as L
              T.$0 < T.$1 and
              P.$0 > P.$1
          emit R.$0 as x, S.$0 as y, S.$1 as z, T.$1 as p];
-store(query, clique);
 '''
 
 # freebase queries
@@ -93,7 +91,6 @@ query = [from r1,r2,r3,r6,r5,r4,r7,r8
         r5.film = r6.perf_id and
         r7.perf_id = r8.film
       emit r8.actor as cast_actor_id];
-store(query, fb_q1);
 -- Store
 '''
 
@@ -145,6 +142,7 @@ query = [from  r5, r3, r4, r6, r1, r2
                r5.$1 = r6.$1 and
                r5.$1 > r6.$1
          emit r1.$0 as x, r5.$0 as y];
+-- Store
 '''
 
 fb_q5 = '''
@@ -166,6 +164,5 @@ query = [from
                r7.$1 = r8.$0 and
                r2.$1 > r8.$1
          emit r1.$0 as x, r5.$0 as y];
-store(query, fb_q5);
-
+-- Store
 '''
