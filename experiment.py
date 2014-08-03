@@ -14,21 +14,29 @@ def experiment(filename, exp_queries):
     with open(filename, "wb") as f:
         writer = csv.writer(f)
         writer.writerow(
-            ["name", "qid", "time", "algebra", "profilingMode", "success"])
+            ["name", "qid", "time", "algebra",
+             "profilingMode", "output", "success"])
         for query in exp_queries:
             # submit queries
-            _, algebra, profile, _, name = query
+            lang, algebra, profile, query_str, name = query
+            if query_str.find("store") == -1:
+                output_name = "{}_{}".format(name, algebra)
+                query_str += "store(query, {})\n".format(output_name)
+            else:
+                raise ValueError("stored relation cannot be pre-defined.")
             result, status = client.execute_query(query)
             # log experiment result
             if result == 'success':
                 print "success"
                 time = float(status["elapsedNanos"]) / client.NANO_IN_ONE_SEC
                 writer.writerow(
-                    [name, status["queryId"], time, algebra, profile, result])
+                    [name, status["queryId"], time,
+                     algebra, profile, output_name, result])
             else:
                 print "error"
                 writer.writerow(
-                    [name, "N.A.", "N.A.", algebra, profile, result])
+                    [name, "N.A.", "N.A.", algebra,
+                     profile, output_name, result])
 
 
 exp_raw_queries = [
