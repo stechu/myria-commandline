@@ -256,7 +256,7 @@ if __name__ == '__main__':
     cold_cache_exp("cold_cache_small_2.csv")
     cold_cache_exp("cold_cache_small_3.csv")
     cold_cache_exp("cold_cache_small_4.csv")
-    #cold_cache_exp("cold_cache_5.csv")
+    cold_cache_exp("cold_cache_small_5.csv")
     #cold_cache_rslfj_exp("cold_cache_rslfj.csv")
     #profile_rslfj("profile_rslfj.csv")
     #resource_rslfj("resource_rslfj.csv")
