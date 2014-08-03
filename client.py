@@ -119,6 +119,9 @@ class MyriaCatalog(Catalog):
 
 
 def execute_query(query):
+    """
+    query - (language, phyiscal_algebra, profiling_mode, query_str, query_name)
+    """
     language, phys_algebra, profilingMode, query_str, query_name = query
     print "executing query {}".format(query_name)
     if connection is None:
