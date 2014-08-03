@@ -77,7 +77,7 @@ def resource_exp():
         languages, phys_algebras, profilingModes, small_set_queries)
     exp_queries = [
         reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
-    experiment("resource_exp_31_july.csv", exp_queries)
+    experiment("resource_exp_3_aug.csv", exp_queries)
 
 
 # experiment 2: profile query execution only
@@ -87,7 +87,7 @@ def profile_exp():
         languages, phys_algebras, profilingModes, small_set_queries)
     exp_queries = [
         reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
-    experiment("profile_exp_31_july.csv", exp_queries)
+    experiment("profile_exp_3_aug.csv", exp_queries)
 
 
 # experiment 3: cold cache experiment
@@ -251,22 +251,13 @@ def add_resource_data(query_file, output_file):
 
 
 if __name__ == '__main__':
-    #resource_exp()
-    # profile_exp()
     cold_cache_exp("cold_cache_small_1.csv")
     cold_cache_exp("cold_cache_small_2.csv")
     cold_cache_exp("cold_cache_small_3.csv")
     cold_cache_exp("cold_cache_small_4.csv")
     cold_cache_exp("cold_cache_small_5.csv")
-    #cold_cache_rslfj_exp("cold_cache_rslfj.csv")
-    #profile_rslfj("profile_rslfj.csv")
-    #resource_rslfj("resource_rslfj.csv")
-    #add_resource_data(
-    #    "/Users/chushumo/Project/papers/2014-multiwayjoin/resource_rslfj.csv",
-    #    "resource_rslfj_extend.csv")
-    #q = ('myrial', "RS_HJ", "NONE", queries.triangle, 'whatever')
-    #execute_query(q)
-    #collect_network_data(1992)
+    resource_exp()
+    profile_exp()
     # add_network_data(
     #    "/Users/chushumo/Project/papers/2014-multiwayjoin/profile_rslfj.csv",
     #    "profile_rslfj_extend_30_july.csv")
