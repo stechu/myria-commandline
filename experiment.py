@@ -24,7 +24,8 @@ def experiment(filename, exp_queries):
                 query_str += "store(query, {})\n".format(output_name)
             else:
                 raise ValueError("stored relation cannot be pre-defined.")
-            result, status = client.execute_query(query)
+            actual_query = (lang, algebra, profile, query_str, name)
+            result, status = client.execute_query(actual_query)
             # log experiment result
             if result == 'success':
                 print "success"
