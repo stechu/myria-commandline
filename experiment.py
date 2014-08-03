@@ -21,7 +21,7 @@ def experiment(filename, exp_queries):
             lang, algebra, profile, query_str, name = query
             if query_str.find("store") == -1:
                 output_name = "{}_{}".format(name, algebra)
-                query_str += "store(query, {})\n".format(output_name)
+                query_str += "store(query, {});\n".format(output_name)
             else:
                 raise ValueError("stored relation cannot be pre-defined.")
             actual_query = (lang, algebra, profile, query_str, name)
