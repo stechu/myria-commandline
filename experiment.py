@@ -17,18 +17,18 @@ def experiment(filename, exp_queries):
             ["name", "qid", "time", "algebra", "profilingMode", "success"])
         for query in exp_queries:
             # submit queries
+            _, algebra, profile, _, name = query
             result, status = client.execute_query(query)
-            _, algebra, profie, _, name = query
             # log experiment result
             if result == 'success':
                 print "success"
                 time = float(status["elapsedNanos"]) / client.NANO_IN_ONE_SEC
                 writer.writerow(
-                    [name, status["queryId"], time, algebra, profie, result])
+                    [name, status["queryId"], time, algebra, profile, result])
             else:
                 print "error"
                 writer.writerow(
-                    [name, "N.A.", "N.A.", algebra, profie, result])
+                    [name, "N.A.", "N.A.", algebra, profile, result])
 
 
 exp_raw_queries = [
