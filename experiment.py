@@ -6,6 +6,7 @@ from operator import itemgetter
 
 hostname = "dbserver02.cs.washington.edu"
 port = "10032"
+num_servers = 64
 
 client.init_connection(hostname, port)
 
@@ -58,11 +59,27 @@ small_set_queries = [
     (queries.fb_q1, 'fb_q1')
 ]
 
+only_q5 = [
+    (queries.fb_q5, 'fb_q5'),
+]
+
+rect_query = [
+    (queries.rectangle, 'rectangle'),
+]
+
 phys_algebras = [
     ('RS_HJ',),
     ('HC_HJ',),
     ('BR_HJ',),
     ('RS_LFJ',),
+    ('HC_LFJ',),
+    ('BR_LFJ',)
+]
+
+phys_algebra_without_rs_lfj = [
+    ('RS_HJ',),
+    ('HC_HJ',),
+    ('BR_HJ',),
     ('HC_LFJ',),
     ('BR_LFJ',)
 ]
@@ -94,7 +111,7 @@ def profile_exp():
 def cold_cache_exp(filename):
     profilingModes = [('NONE',)]
     exp_queries = itertools.product(
-        languages, phys_algebras, profilingModes, small_set_queries)
+        languages, phys_algebra_without_rs_lfj, profilingModes, rect_query)
     exp_queries = [
         reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
     experiment(filename, exp_queries)
