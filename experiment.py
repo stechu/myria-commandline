@@ -250,14 +250,40 @@ def add_resource_data(query_file, output_file):
         csvwriter.writerows(data)
 
 
+def get_output_skew(table_name):
+    stored_count_table_name = "cnt_{}".format(table_name)
+    query = """
+    R = scan({});
+    output = [from R emit count(*) as cnt, worker_id() as worker];
+    store(output, {});
+    """.format(table_name, stored_count_table_name)
+    result, status = client.execute_query(
+        ('myrial', 'RS_HJ', 'NONE', query, 'get_skew'))
+    if result == 'success':
+        print "success"
+        rel_key = {
+            'userName': 'public',
+            'programName': 'adhoc',
+            'relationName': stored_count_table_name
+        }
+        tpl_cnts = client.connection.download_dataset(rel_key)
+        tpl_cnts = [long(entry['cnt']) for entry in tpl_cnts]
+        skew = max(tpl_cnts) / (sum(tpl_cnts) / float(num_servers))
+        return skew
+    else:
+        print "error"
+        raise Exception(status)
+
+
 if __name__ == '__main__':
     cold_cache_exp("cold_cache_small_1.csv")
     cold_cache_exp("cold_cache_small_2.csv")
     cold_cache_exp("cold_cache_small_3.csv")
     cold_cache_exp("cold_cache_small_4.csv")
     cold_cache_exp("cold_cache_small_5.csv")
-    resource_exp()
-    profile_exp()
+    #resource_exp()
+    #profile_exp()
+    #print get_output_skew('rect_e5_skew')
     # add_network_data(
     #    "/Users/chushumo/Project/papers/2014-multiwayjoin/profile_rslfj.csv",
     #    "profile_rslfj_extend_30_july.csv")
