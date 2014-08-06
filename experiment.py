@@ -293,11 +293,11 @@ def get_output_skew(table_name):
 
 
 if __name__ == '__main__':
-    cold_cache_exp("cold_cache_small_1.csv")
-    cold_cache_exp("cold_cache_small_2.csv")
-    cold_cache_exp("cold_cache_small_3.csv")
-    cold_cache_exp("cold_cache_small_4.csv")
-    cold_cache_exp("cold_cache_small_5.csv")
+    cold_cache_exp("cold_cache_rect_1.csv")
+    cold_cache_exp("cold_cache_rect_2.csv")
+    cold_cache_exp("cold_cache_rect_3.csv")
+    cold_cache_exp("cold_cache_rect_4.csv")
+    cold_cache_exp("cold_cache_rect_5.csv")
     #resource_exp()
     #profile_exp()
     #print get_output_skew('rect_e5_skew')
