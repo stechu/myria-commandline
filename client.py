@@ -152,6 +152,30 @@ def execute_query(query):
         return 'fail', 'ConnectionError'
 
 
+def execute_json(json_query):
+    """
+    Execute json query.
+    Argument:
+        json_query - json query
+    """
+    # check connections
+    if connection is None:
+        raise Exception("connection is not initiated.")
+    try:
+        # execute the query util it is finished (or errored)
+        query_status = connection.execute_query(json_query)
+        if query_status["status"] == 'SUCCESS':
+            return 'success', query_status
+        else:
+            return query_status["status"], query_status
+    except myria.MyriaError as e:
+        print "myrial error: {}".format(e)
+        return 'fail', 'MyriaError'
+    except requests.ConnectionError as e:
+        print e
+        return 'fail', 'ConnectionError'
+
+
 def init_connection(hostname, port):
         global connection
         connection = myria.MyriaConnection(hostname=hostname, port=port)
