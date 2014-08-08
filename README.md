@@ -1,4 +1,4 @@
 myria-commandline
 =================
 
-Homebrewed myria query authoring tool.
+Home brewed Myria query authoring tool.
