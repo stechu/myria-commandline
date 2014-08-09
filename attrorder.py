@@ -3,16 +3,37 @@
 
 from operator import itemgetter
 import itertools
+import csv
 
 
-def extract_info(tables):
+def extract_info(table_files):
     """
     Extract information from tables.
     Arguments:
         tables - input tables, in csv format
     Return:
     """
-    return []
+    ret = []
+    for fname in table_files:
+        table = {}
+        # read data from csv
+        with open(fname, "rb") as f:
+            reader = csv.reader(f)
+            data = [r for r in reader]
+        # record header and arity
+        table["header"] = data[0]
+        assert data[0] > 0
+        table["arity"] = len(data[0])
+        # record unique values for each col
+        values = [set() for col in data[0]]
+        for row in data[1:]:
+            for i, value in enumerate(row):
+                values[i].add(value)
+        v_cnt = [len(value_set) for value_set in values]
+        table["value_cnt"] = v_cnt
+        table["rows"] = len(data) - 1
+        ret.append(table)
+    return ret
 
 
 def cost(order, join_map, rel_info):
@@ -81,3 +102,6 @@ def change_order(json_query, order):
     for cols, child_idx in zip(new_sort_order, children):
         ops[child_idx]["argSortColumns"] = cols
     return json_query
+
+if __name__ == "__main__":
+    extract_info(["table1.csv", "table2.csv"])
