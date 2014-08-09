@@ -1,8 +1,8 @@
 # collect selectivity data from input, change attribute orders
 # everything is hardcoded, but before deadline, who cares?
 
-import json
-import csv
+from operator import itemgetter
+import itertools
 
 
 def extract_info(tables):
@@ -36,30 +36,48 @@ def optimal_order(join_map, tables):
     return []
 
 
-def change_order(order):
+def change_order(json_query, order):
     """
     Change attribute order of a LFJ json query
     Arguments:
         - order: a new order (permutation)
     """
-    with open("q1_local_lfj.json") as f:
-        json_query = json.load(f)
+    lfj_pos = 16    # NOTE: this is hardcoded!
+    jfm = "joinFieldMapping"
     ops = json_query["plan"]["fragments"][0]["operators"]
-    assert ops[16]["opType"] == "LeapFrogJoin"
-    # get join map
-    join_map = ops[16]["joinFieldMapping"]
+    assert ops[lfj_pos]["opType"] == "LeapFrogJoin"
+    # 1. get join map
+    join_map = ops[lfj_pos][jfm]
     assert len(order) == len(join_map)
-    # get children
-    child_ids = ops[16]["argChildren"]
+    # 2. get children
+    child_ids = ops[lfj_pos]["argChildren"]
     children = []
     for child_id in child_ids:
-        child_op = [op for op in ops if op["opId"] == child_id]
-        assert len(child_op) == 1
-        children.extend(child_op)
-    # change sort order accordingly
-    for child in children:
-        print child
-
-
-if __name__ == '__main__':
-    change_order([0, 1, 2, 3, 4, 5])
+        # store child and its idx
+        child_idx = [
+            i for i, op in enumerate(ops) if op["opId"] == child_id]
+        assert len(child_idx) == 1
+        children.extend(child_idx)
+    # 3. re-order join map
+    new_join_map = []
+    for o in order:
+        new_join_map.append(join_map[o])
+    # 4. change sort order accordingly
+    attr_list = []  # (dim_idx, table_index, col_idx)
+    for i, equi_class in enumerate(new_join_map):
+        for table_idx, col_idx in equi_class:
+            attr_list.append((i, table_idx, col_idx))
+    attr_list = sorted(attr_list, key=itemgetter(1))
+    attr_list = itertools.groupby(attr_list, key=itemgetter(1))
+    attr_with_order = []
+    for table_idx, grp in attr_list:
+        attr_with_order.append(sorted(list(grp)))
+    new_sort_order = []
+    for attrs in attr_with_order:
+        new_sort_order.append([col for dim, table, col in attrs])
+    assert len(new_sort_order) == len(children)
+    # 5. put changed lfj and sort back
+    ops[lfj_pos][jfm] = new_join_map
+    for cols, child_idx in zip(new_sort_order, children):
+        ops[child_idx]["argSortColumns"] = cols
+    return json_query
