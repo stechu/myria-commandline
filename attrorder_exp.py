@@ -82,5 +82,5 @@ def execute_original_query():
 
 if __name__ == '__main__':
     #execute_original_query()
-    #random_order_lfj("single_machine.csv")
-    print sample_orders(1, 6)
+    random_order_lfj("single_machine.csv")
+    #print sample_orders(1, 6)
