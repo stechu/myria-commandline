@@ -4,6 +4,10 @@
 from operator import itemgetter
 import itertools
 import csv
+import json
+import pickle
+import os.path
+import attrorder_exp
 
 
 def extract_info(table_files):
@@ -36,9 +40,9 @@ def extract_info(table_files):
     return ret
 
 
-def cost(order, join_map, rel_info):
+def cost_no_hh(join_map, sort_order, rel_info):
     """
-    Estimate the cost of a query.
+    Estimate the cost of a query, do not consider heavy hitters.
     Arguments:
         order - reorder the join_map according to this permutation
         join_map - an array of groups of equivalent classes of equi-join fields
@@ -48,7 +52,27 @@ def cost(order, join_map, rel_info):
     Return:
         cost - a float number indicating the cost of current join order
     """
-    return 0.0
+    return cost_no_hh_recursive(join_map, sort_order, rel_info, 0)
+
+
+def cost_no_hh_recursive(join_map, sort_order, rel_info, cur_pos):
+    # do the estimation at current level
+    sizes = []
+    for table, col in join_map[cur_pos]:
+        table_info = rel_info[table]
+        if sort_order[table].index(col) == 0:
+            sizes.append(table_info["value_cnt"][col])
+        else:
+            assert table_info["arity"] == 2
+            other_col = 1 if col == 0 else 0
+            est_size = table_info["rows"]/float(
+                table_info["value_cnt"][other_col])
+            sizes.append(est_size)
+    if cur_pos + 1 < len(join_map):
+        return min(sizes) * cost_no_hh_recursive(
+            join_map, sort_order, rel_info, cur_pos+1)
+    else:
+        return min(sizes)
 
 
 def optimal_order(join_map, tables):
@@ -101,7 +125,29 @@ def change_order(json_query, order):
     ops[lfj_pos][jfm] = new_join_map
     for cols, child_idx in zip(new_sort_order, children):
         ops[child_idx]["argSortColumns"] = cols
-    return json_query
+    return json_query, new_join_map, new_sort_order
+
+
+def get_and_save_table_info():
+    """
+    Run this before at least once before change input data
+    """
+    table_list = [
+        "table1.csv", "table2.csv", "table3.csv", "table4.csv",
+        "table5.csv", "table6.csv", "table7.csv", "table8.csv"
+    ]
+    if os.path.isfile("rel.info"):
+        rel_info = pickle.load(open("rel.info", "rb"))
+    else:
+        rel_info = extract_info(table_list)
+        pickle.dump(rel_info, open("rel.info", "wb"))
+    return rel_info
+
 
 if __name__ == "__main__":
-    extract_info(["table1.csv", "table2.csv"])
+    with open("q1_local_lfj.json") as f:
+        json_query = json.load(f)
+    for order in attrorder_exp.sampled_orders:
+        query, join_map, sort_order = change_order(json_query, order)
+        rel_info = get_and_save_table_info()
+        print cost_no_hh(join_map, sort_order, rel_info)
