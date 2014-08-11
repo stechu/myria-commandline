@@ -7,7 +7,10 @@ import csv
 import json
 import pickle
 import os.path
-import attrorder_exp
+
+
+# threshold of heavyhitters, fraction of total number of rows
+hh_threshold = 0.05
 
 
 def extract_info(table_files):
@@ -40,7 +43,7 @@ def extract_info(table_files):
     return ret
 
 
-def cost_no_hh(join_map, sort_order, rel_info):
+def cost_no_hh(join_map, sort_order, rel_info, heavy_hitter="no"):
     """
     Estimate the cost of a query, do not consider heavy hitters.
     Arguments:
@@ -52,7 +55,10 @@ def cost_no_hh(join_map, sort_order, rel_info):
     Return:
         cost - a float number indicating the cost of current join order
     """
-    return cost_no_hh_recursive(join_map, sort_order, rel_info, 0)
+    if heavy_hitter == "no":
+        return cost_no_hh_recursive(join_map, sort_order, rel_info, 0)
+    elif heavy_hitter == "yes":
+        return cost_hh_recursive(join_map, sort_order, rel_info, 0)
 
 
 def cost_no_hh_recursive(join_map, sort_order, rel_info, cur_pos):
@@ -68,6 +74,7 @@ def cost_no_hh_recursive(join_map, sort_order, rel_info, cur_pos):
             est_size = table_info["rows"]/float(
                 table_info["value_cnt"][other_col])
             sizes.append(est_size)
+    # print sizes
     if cur_pos + 1 < len(join_map):
         return min(sizes) * cost_no_hh_recursive(
             join_map, sort_order, rel_info, cur_pos+1)
@@ -75,10 +82,19 @@ def cost_no_hh_recursive(join_map, sort_order, rel_info, cur_pos):
         return min(sizes)
 
 
-def optimal_order(join_map, tables):
+def optimal_order():
     """
     """
-    return []
+    with open("q1_local_lfj.json") as f:
+        json_query = json.load(f)
+    all_orders = list(itertools.permutations(list(range(6))))
+    order_and_cost = []
+    for order in all_orders:
+        query, join_map, sort_order = change_order(json_query, order)
+        rel_info = get_and_save_table_info()
+        cost = cost_no_hh(join_map, sort_order, rel_info)
+        order_and_cost.append((order, cost))
+    return min(order_and_cost, key=itemgetter(1))
 
 
 def change_order(json_query, order):
@@ -144,10 +160,33 @@ def get_and_save_table_info():
     return rel_info
 
 
-if __name__ == "__main__":
+def examine_orders():
     with open("q1_local_lfj.json") as f:
         json_query = json.load(f)
-    for order in attrorder_exp.sampled_orders:
+    order = (3, 2, 0, 4, 5, 1)
+    query, join_map, sort_order = change_order(json_query, order)
+    print "------------- join map --------------"
+    for e in join_map:
+        print e
+    rel_info = get_and_save_table_info()
+    print "------------ table stats ------------"
+    for e in rel_info:
+        print e["value_cnt"], e["rows"]
+    print "--------- cost computation ----------"
+    print cost_no_hh(join_map, sort_order, rel_info)
+
+
+def a():
+    orders = [
+        (5, 0, 4, 1, 2, 3),
+        (4, 0, 2, 5, 1, 3),
+        (3, 2, 0, 4, 5, 1)]
+    with open("q1_local_lfj.json") as f:
+        json_query = json.load(f)
+    for order in orders:
         query, join_map, sort_order = change_order(json_query, order)
         rel_info = get_and_save_table_info()
         print cost_no_hh(join_map, sort_order, rel_info)
+
+if __name__ == "__main__":
+    print optimal_order()

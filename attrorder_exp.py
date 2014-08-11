@@ -25,11 +25,21 @@ sampled_orders = [
     (4, 0, 2, 5, 1, 3),
     (3, 2, 0, 4, 5, 1)]
 
+sampled_orders_2 = [
+    (4, 5, 2, 3, 1, 0),
+    (3, 2, 0, 4, 1, 5),
+    (0, 5, 2, 1, 4, 3),
+    (1, 2, 0, 3, 5, 4),
+    (3, 5, 4, 1, 2, 0),
+    (2, 5, 3, 1, 4, 0),
+    (4, 2, 0, 5, 1, 3),
+    (2, 0, 5, 3, 4, 1),
+    (2, 4, 1, 5, 3, 0)]
+
 
 def sample_orders(size, join_arity):
     all_order = list(itertools.permutations(list(range(join_arity))))
     idx = [random.randint(0, 719) for i in range(size)]
-    print idx
     return [all_order[i] for i in idx]
 
 
@@ -47,15 +57,15 @@ def hypercube_shuffle():
             client.execute_json(query)
 
 
-def random_order_lfj(log_file_name):
+def random_order_lfj(log_file_name, orders):
     with open("q1_local_lfj.json") as f:
         json_query = json.load(f)
 
     with open(log_file_name, "wb") as f:
         csvwriter = csv.writer(f)
         csvwriter.writerow(["query_id", "order", "time", "success or fail"])
-        for order in sampled_orders:
-            json_query = attrorder.change_order(json_query, order)
+        for order in orders:
+            json_query, a, b = attrorder.change_order(json_query, order)
             # json_query["profilingMode"] = 'QUERY' # profile query
             print "execute leapfrog join with order {}".format(order)
             result, status = client.execute_json(json_query)
@@ -73,14 +83,13 @@ def random_order_lfj(log_file_name):
 def execute_original_query():
     with open("q1_local_lfj.json") as f:
         json_query = json.load(f)
-    new_order = [0, 4, 1, 2, 3, 5]
-    print "executing"
-    new_query = attrorder.change_order(json_query, new_order)
-    new_query["profilingMode"] = 'QUERY'
+    new_order = (3, 2, 4, 1, 0, 5)
+    print "executing {}".format(new_order)
+    new_query, a, b = attrorder.change_order(json_query, new_order)
+    #new_query["profilingMode"] = 'QUERY'
     client.execute_json(new_query)
 
 
 if __name__ == '__main__':
-    #execute_original_query()
-    random_order_lfj("single_machine.csv")
-    #print sample_orders(1, 6)
+    execute_original_query()
+    #random_order_lfj("single_machine_3.csv", sampled_orders_2)
