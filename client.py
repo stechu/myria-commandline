@@ -118,7 +118,7 @@ class MyriaCatalog(Catalog):
         return DEFAULT_CARDINALITY
 
 
-def execute_query(query):
+def execute_query(query, workers="ALL"):
     """
     query - (language, phyiscal_algebra, profiling_mode, query_str, query_name)
     """
@@ -138,6 +138,9 @@ def execute_query(query):
         compiled = compile_to_json(
             query_str, logical_plan, physical_plan, language)
         compiled['profilingMode'] = profilingMode
+        if workers != "ALL":
+            for fragment in compiled["plan"]["fragments"]:
+                fragment["workers"] = workers
         # execute the query util it is finished (or errored)
         query_status = connection.execute_query(compiled)
         if query_status["status"] == 'SUCCESS':

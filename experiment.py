@@ -1,6 +1,7 @@
 import client
 import csv
 import queries
+import scalability_queries
 import itertools
 from operator import itemgetter
 
@@ -11,7 +12,7 @@ num_servers = 64
 client.init_connection(hostname, port)
 
 
-def experiment(filename, exp_queries):
+def experiment(filename, exp_queries, workers="ALL"):
     with open(filename, "wb") as f:
         writer = csv.writer(f)
         writer.writerow(
@@ -24,9 +25,20 @@ def experiment(filename, exp_queries):
                 output_name = "{}_{}".format(name, algebra)
                 query_str += "store(query, {});\n".format(output_name)
             else:
-                raise ValueError("stored relation cannot be pre-defined.")
+                output_name = "defined"
+            #    raise ValueError("stored relation cannot be pre-defined.")
             actual_query = (lang, algebra, profile, query_str, name)
-            result, status = client.execute_query(actual_query)
+            if name == "worker_2":
+                new_workers = list(range(1, 3))
+            elif name == "worker_4":
+                new_workers = list(range(1, 5))
+            elif name == "worker_8":
+                new_workers = list(range(1, 9))
+            elif name == "worker_16":
+                new_workers = list(range(1, 17))
+            elif name == "worker_32":
+                new_workers = list(range(1, 33))
+            result, status = client.execute_query(actual_query, new_workers)
             # log experiment result
             if result == 'success':
                 print "success"
@@ -145,6 +157,21 @@ def resource_rslfj(filename):
     phys_algebras = [('RS_LFJ',)]
     exp_queries = itertools.product(
         languages, phys_algebras, profilingModes, exp_raw_queries)
+    exp_queries = [
+        reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
+    experiment(filename, exp_queries)
+
+
+# experiment 7: scalability queries
+def scalability_exp(filename):
+    scl_queries = [
+        (scalability_queries.worker_8, "worker_8"),
+        (scalability_queries.worker_16, "worker_16"),
+    ]
+    profilingModes = [('NONE',)]
+    phys_algebras = [('RS_HJ',)]
+    exp_queries = itertools.product(
+        languages, phys_algebras, profilingModes, scl_queries)
     exp_queries = [
         reduce(lambda t1, t2: t1 + t2, query) for query in exp_queries]
     experiment(filename, exp_queries)
@@ -293,7 +320,7 @@ def get_output_skew(table_name):
 
 
 if __name__ == '__main__':
-    #cold_cache_exp("cold_cache_rect_1.csv")
+    scalability_exp("scalability_extrac.csv")
     #cold_cache_exp("cold_cache_rect_2.csv")
     #cold_cache_exp("cold_cache_rect_3.csv")
     #cold_cache_exp("cold_cache_rect_4.csv")
