@@ -3,6 +3,7 @@ import collections
 from pulp import *
 from operator import mul
 import math
+import itertools
 
 
 def pretty_json(obj):
@@ -91,3 +92,17 @@ def frac_dim_sizes(num_server, child_sizes, child_num_cols, join_conditions):
     dim_sizes = [math.pow(num_server, x) for x in logs]
     r_index = reversed_index(child_num_cols, join_conditions)
     return (workload(dim_sizes, child_sizes, r_index), dim_sizes)
+
+
+def shuffle_cost_vs_assignment(assignment, hc_sizes, child_sizes,
+                               child_num_cols, join_conditions):
+    """
+        Calculate shuffle cost of a virtual server assignment.
+        Argument:
+            assignment - a partition of virtual server
+            child_sizes - sizes of input relations
+            child_num_cols - num of cols of input relations
+            join_conditions - join condition map, equal classes of joined cols
+    """
+    assert len(assignment) == reduce(mul, hc_sizes, 1)
+    return 0.0
