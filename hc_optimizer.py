@@ -34,21 +34,6 @@ def workload(dim_sizes, child_sizes, r_index):
     return load
 
 
-# using recursive call: will expode the stack
-def enum_dim_sizes(visited, dim_sizes, num_server,
-                   child_sizes, r_index):
-    visited.add(dim_sizes)
-    yield (workload(dim_sizes, child_sizes, r_index), dim_sizes)
-    for i, d in enumerate(dim_sizes):
-        new_dim_sizes = dim_sizes[0:i] + tuple([dim_sizes[i]+1])
-        new_dim_sizes += dim_sizes[i+1:]
-        if product_not_greater(new_dim_sizes, num_server)\
-           and new_dim_sizes not in visited:
-            for x in enum_dim_sizes(visited, new_dim_sizes, num_server,
-                                    child_sizes, r_index):
-                yield x
-
-
 # using bfs to get optimal dimension sizes
 def get_dim_sizes_bfs(num_server, child_sizes,
                       child_num_cols, join_conditions):
