@@ -1,17 +1,8 @@
 import json
-import argparse
 import collections
 from pulp import *
 from operator import mul
 import math
-
-#parse args
-parser = argparse.ArgumentParser(
-    description='collect running time of workers of a query')
-parser.add_argument("-query", type=str, help="query json file")
-parser.add_argument("-worker_number", type=int, help="number of workers")
-parser.add_argument("-e", type=float, help="relax parameter")
-args = parser.parse_args()
 
 
 def pretty_json(obj):
@@ -56,13 +47,6 @@ def enum_dim_sizes(visited, dim_sizes, num_server,
             for x in enum_dim_sizes(visited, new_dim_sizes, num_server,
                                     child_sizes, r_index):
                 yield x
-
-
-def get_dim_size_dfs(num_server, child_sizes, child_num_cols, join_conditions):
-    firstDims = tuple([1 for x in join_conditions])
-    r_index = reversed_index(child_num_cols, join_conditions)
-    return min(enum_dim_sizes(set(), firstDims, num_server,
-                              child_sizes, r_index))
 
 
 # using bfs to get optimal dimension sizes
