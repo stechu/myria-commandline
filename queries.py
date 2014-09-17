@@ -25,7 +25,7 @@ R = scan(chushumo:multiway_join:twitter_1m);
 -- query(x,y,z,p):-R(x,y),S(y,z),T(z,x),P(x,p)
 query = [from
             R, R as S, R as T, R as P
-         where R.$1 = S.$0 and
+            where R.$1 = S.$0 and
                S.$1 = T.$0 and
                T.$1 = S.$0 and
                P.$0 = S.$0 and

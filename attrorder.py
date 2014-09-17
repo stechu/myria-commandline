@@ -57,8 +57,6 @@ def cost_no_hh(join_map, sort_order, rel_info, heavy_hitter="no"):
     """
     if heavy_hitter == "no":
         return cost_no_hh_recursive(join_map, sort_order, rel_info, 0)
-    elif heavy_hitter == "yes":
-        return cost_hh_recursive(join_map, sort_order, rel_info, 0)
 
 
 def cost_no_hh_recursive(join_map, sort_order, rel_info, cur_pos):

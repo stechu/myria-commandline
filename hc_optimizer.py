@@ -1,7 +1,7 @@
 import json
 import collections
 from pulp import *
-from operator import mul
+from operator import mul, itemgetter
 import math
 import itertools
 
@@ -13,7 +13,8 @@ def pretty_json(obj):
 def reversed_index(child_num_cols, join_conditions):
     """ Return reverse index of join_conditions.
         r_index[i][j] -> k, j-th column of i-th child is in k-th
-        join conditions
+        join conditions, if the column is not joined, its r_index value will
+        be -1
     """
     # make it -1 first
     r_index = [[-1] * num_cols for num_cols in child_num_cols]
@@ -94,6 +95,21 @@ def frac_dim_sizes(num_server, child_sizes, child_num_cols, join_conditions):
     return (workload(dim_sizes, child_sizes, r_index), dim_sizes)
 
 
+def coordinate_to_vs(coordinate, hc_sizes):
+    """
+        Return the virtual server id of a given coordinate.
+        Argument:
+            coordinate - the input coordiante that has the len(hc_sizes) dims
+            hc_sizes - sizes of dimensions of HyperCube
+    """
+    assert len(coordinate) == len(hc_sizes)
+    vs = 0
+    for i, s in enumerate(coordinate):
+        print reduce(mul, hc_sizes[i+1:], 1)
+        vs += s * reduce(mul, hc_sizes[i+1:], 1)
+    return vs
+
+
 def shuffle_cost_vs_assignment(assignment, hc_sizes, child_sizes,
                                child_num_cols, join_conditions):
     """
@@ -105,4 +121,35 @@ def shuffle_cost_vs_assignment(assignment, hc_sizes, child_sizes,
             join_conditions - join condition map, equal classes of joined cols
     """
     assert len(assignment) == reduce(mul, hc_sizes, 1)
-    return 0.0
+    # 1. compute reversed index and vs_rs_map
+    r_index = reversed_index(child_num_cols, join_conditions)
+    vs_rs_map = dict()
+    for i, partition in enumerate(assignment):
+        for vs in partition:
+            vs_rs_map[vs] = i
+    # 2. compute shuffle cost of each relation
+    print r_index
+    cost = 0.0
+    for i, cols in enumerate(r_index):
+        # get subcube dims and their sizes
+        subc_dims = sorted([order for order in cols if order != -1])
+        subc_sizes = [hc_sizes[d] for d in subc_dims]
+        # get unjoined dims and their sizes
+        un_joined_dims = [
+            d for d in range(len(hc_sizes)) if d not in subc_dims]
+        un_joined_sizes = [hc_sizes[d] for d in un_joined_dims]
+
+        num_voxels = reduce(mul, subc_sizes, 1)         # number of voxels
+        voxel_wl = hc_sizes[i]/num_voxels               # workload per voxel
+        shuffle_ranges = [range(s) for s in subc_sizes]
+        broadcast_ranges = [range(s) for s in un_joined_sizes]
+        for vox_coor in itertools.product(*shuffle_ranges):
+            rs = set()
+            for brcst_coor in itertools.product(*broadcast_ranges):
+                idx_coor = zip(subc_dims, vox_coor) + zip(
+                    un_joined_dims, brcst_coor)
+                coor = map(itemgetter(1), sorted(idx_coor))
+                vs = coordinate_to_vs(coor, hc_sizes)
+                rs.add(vs_rs_map[vs])
+            cost += len(rs) * voxel_wl
+    return cost
