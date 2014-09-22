@@ -105,7 +105,6 @@ def coordinate_to_vs(coordinate, hc_sizes):
     assert len(coordinate) == len(hc_sizes)
     vs = 0
     for i, s in enumerate(coordinate):
-        print reduce(mul, hc_sizes[i+1:], 1)
         vs += s * reduce(mul, hc_sizes[i+1:], 1)
     return vs
 
@@ -120,7 +119,7 @@ def shuffle_cost_vs_assignment(assignment, hc_sizes, child_sizes,
             child_num_cols - num of cols of input relations
             join_conditions - join condition map, equal classes of joined cols
     """
-    assert len(assignment) == reduce(mul, hc_sizes, 1)
+    assert sum(len(part) for part in assignment) == reduce(mul, hc_sizes, 1)
     # 1. compute reversed index and vs_rs_map
     r_index = reversed_index(child_num_cols, join_conditions)
     vs_rs_map = dict()
@@ -128,7 +127,6 @@ def shuffle_cost_vs_assignment(assignment, hc_sizes, child_sizes,
         for vs in partition:
             vs_rs_map[vs] = i
     # 2. compute shuffle cost of each relation
-    print r_index
     cost = 0.0
     for i, cols in enumerate(r_index):
         # get subcube dims and their sizes
@@ -138,9 +136,8 @@ def shuffle_cost_vs_assignment(assignment, hc_sizes, child_sizes,
         un_joined_dims = [
             d for d in range(len(hc_sizes)) if d not in subc_dims]
         un_joined_sizes = [hc_sizes[d] for d in un_joined_dims]
-
         num_voxels = reduce(mul, subc_sizes, 1)         # number of voxels
-        voxel_wl = hc_sizes[i]/num_voxels               # workload per voxel
+        voxel_wl = child_sizes[i]/float(num_voxels)     # workload per voxel
         shuffle_ranges = [range(s) for s in subc_sizes]
         broadcast_ranges = [range(s) for s in un_joined_sizes]
         for vox_coor in itertools.product(*shuffle_ranges):

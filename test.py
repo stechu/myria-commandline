@@ -102,24 +102,22 @@ class TestOpimizerFunctions(unittest.TestCase):
         print workload(ndim_sizes, child_sizes, r_index)
         print wl_by_opt, dim_sizes
 
-    def test_coordinate_to_vs():
+    def test_coordinate_to_vs(self):
         assert coordinate_to_vs((1, 2, 4), (2, 4, 5)) == 34
 
-
-def test_vs_assignment():
-    # Result(x, y, z, p) :- R(x, y), S(y, z), T(z, p)
-    join_conditions = [[(0, 1), (1, 0)], [(1, 1), (2, 0)]]
-    child_sizes = [100, 50, 100]
-    assignment_1 = [(0, 1), (2, 3), (4, 5), (6, 7)]
-    # assignment_2 = [(2, 5), (1, 4), (0, 3), (6, 7)]
-    child_num_cols = [2, 2, 2]
-    hc_sizes = [2, 2]
-    print shuffle_cost_vs_assignment(
-        assignment_1, hc_sizes, child_sizes, child_num_cols, join_conditions)
-    # print shuffle_cost_vs_assignment(
-    #    assignment_2, hc_sizes, child_sizes, child_num_cols, join_conditions)
-
-
-if __name__ == '__main__':
-    # unittest.main()
-    test_vs_assignment()
+    def test_vs_assignment(self):
+        # Result(x, y, z, p) :- R(x, y), S(y, z), T(z, p)
+        join_conditions = [[(0, 1), (1, 0)], [(1, 1), (2, 0)]]
+        child_sizes = [100, 50, 100]
+        assignment_1 = [(0, 1), (2, 3), (4, 5), (6, 7)]
+        assignment_2 = [(2, 5), (1, 4), (0, 3), (6, 7)]
+        child_num_cols = [2, 2, 2]
+        hc_sizes = [2, 4]
+        r1 = shuffle_cost_vs_assignment(
+            assignment_1, hc_sizes, child_sizes,
+            child_num_cols, join_conditions)
+        assert r1 == 450
+        r2 = shuffle_cost_vs_assignment(
+            assignment_2, hc_sizes, child_sizes,
+            child_num_cols, join_conditions)
+        assert r2 == 550
