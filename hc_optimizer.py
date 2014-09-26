@@ -109,8 +109,8 @@ def coordinate_to_vs(coordinate, hc_sizes):
     return vs
 
 
-def shuffle_cost_vs_assignment(assignment, hc_sizes, child_sizes,
-                               child_num_cols, join_conditions):
+def vcell_hcs_cost(assignment, hc_sizes, child_sizes,
+                   child_num_cols, join_conditions):
     """
         Calculate shuffle cost of a virtual server assignment.
         Argument:

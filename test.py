@@ -1,6 +1,6 @@
 from hc_optimizer import (workload,
                           reversed_index,
-                          shuffle_cost_vs_assignment,
+                          vcell_hcs_cost,
                           get_dim_sizes_bfs,
                           frac_dim_sizes,
                           coordinate_to_vs)
@@ -113,11 +113,11 @@ class TestOpimizerFunctions(unittest.TestCase):
         assignment_2 = [(2, 5), (1, 4), (0, 3), (6, 7)]
         child_num_cols = [2, 2, 2]
         hc_sizes = [2, 4]
-        r1 = shuffle_cost_vs_assignment(
+        r1 = vcell_hcs_cost(
             assignment_1, hc_sizes, child_sizes,
             child_num_cols, join_conditions)
         assert r1 == 450
-        r2 = shuffle_cost_vs_assignment(
+        r2 = vcell_hcs_cost(
             assignment_2, hc_sizes, child_sizes,
             child_num_cols, join_conditions)
         assert r2 == 550
