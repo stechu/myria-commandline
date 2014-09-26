@@ -2,10 +2,19 @@
 # a bar plot with errorbars
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 import csv
 
 bar_width = 0.6
 xstick_offset = 0.3
+
+font = {
+    'family': 'serif',
+    'size': 21}
+
+matplotlib.rc('font', **font)
+dpi = plt.figure().dpi
+matplotlib.rcParams.update({'figure.autolayout': True})
 
 
 def to_float(str):
@@ -22,12 +31,11 @@ def plot_wc_time(algebras, time, std, output_name):
     fig, ax = plt.subplots()
     ax.bar(ind, time, width=bar_width, color='m', yerr=std)
     ax.set_ylabel('Time (sec)')
-    ax.set_xlabel('Physical Algebra')
-    ax.set_title('Wall clock time')
+    # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
     print "outputing {}".format(output_name)
-    plt.savefig(output_name, format='pdf')
+    plt.savefig(output_name, format='pdf', dpi=dpi)
 
 
 def plot_cpu_time(algebras, time, output_name):
@@ -39,12 +47,11 @@ def plot_cpu_time(algebras, time, output_name):
     fig, ax = plt.subplots()
     ax.bar(ind, time, width=bar_width, color='m')
     ax.set_ylabel('Time (sec)')
-    ax.set_xlabel('Physical Algebra')
-    ax.set_title('Total CPU time')
+    # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
     print "outputing {}".format(output_name)
-    plt.savefig(output_name, format='pdf')
+    plt.savefig(output_name, format='pdf', dpi=dpi)
 
 
 def plot_shuffle_skew(algebras, skews, output_name):
@@ -56,12 +63,11 @@ def plot_shuffle_skew(algebras, skews, output_name):
     fig, ax = plt.subplots()
     ax.bar(ind, skews, width=bar_width, color='m')
     ax.set_ylabel('Skew (max/avg)')
-    ax.set_xlabel('Physical Algebra')
-    ax.set_title('Maximal skew in shuffle(s)')
+    # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
     print "outputing {}".format(output_name)
-    plt.savefig(output_name, format='pdf')
+    plt.savefig(output_name, format='pdf', dpi=dpi)
 
 
 def plot_shuffle_size(algebras, shuffle_size, output_name):
@@ -72,13 +78,12 @@ def plot_shuffle_size(algebras, shuffle_size, output_name):
     ind = np.arange(len(shuffle_size))  # the x locations for the groups
     fig, ax = plt.subplots()
     ax.bar(ind, shuffle_size, width=bar_width, color='m')
-    ax.set_ylabel('Number of tuples shuffled (million)')
-    ax.set_xlabel('Physical Algebra')
-    ax.set_title('Number of tuples shuffled')
+    ax.set_ylabel('Tuples shuffled (million)')
+    # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
     print "outputing {}".format(output_name)
-    plt.savefig(output_name, format='pdf')
+    plt.savefig(output_name, format='pdf', dpi=dpi)
 
 
 def plot_output_skew(algebras, skews, output_name):
@@ -90,12 +95,11 @@ def plot_output_skew(algebras, skews, output_name):
     fig, ax = plt.subplots()
     ax.bar(ind, skews, width=bar_width, color='m')
     ax.set_ylabel('Skew (max/avg)')
-    ax.set_xlabel('Physical Algebra')
-    ax.set_title('Maximal skew in output')
+    # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
     print "outputing {}".format(output_name)
-    plt.savefig(output_name, format='pdf')
+    plt.savefig(output_name, format='pdf', dpi=dpi)
 
 
 def plot_hashtable_size(algebras, htsizes, output_name):
@@ -106,16 +110,15 @@ def plot_hashtable_size(algebras, htsizes, output_name):
     fig, ax = plt.subplots()
     ax.bar(ind, htsizes, width=bar_width, color='m')
     ax.set_ylabel('Memory usage (MB)')
-    ax.set_xlabel('Physical Algebra')
-    ax.set_title('Memory usage')
+    # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
     print "outputing {}".format(output_name)
-    plt.savefig(output_name, format='pdf')
+    plt.savefig(output_name, format='pdf', dpi=dpi)
 
 
 def plot():
-    fname = "SIGMOD Experiment - summary.csv"
+    fname = "csvs/SIGMOD Experiment - summary.csv"
     agbrs = ('RS_HJ', 'HC_HJ', 'BR_HJ', 'RS_LFJ', 'HC_LFJ', 'BR_LFJ')
     queries = ('triangle',  'clique', 'fb_q1')
     with open(fname, "rU") as f:
