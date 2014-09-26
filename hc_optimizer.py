@@ -113,21 +113,25 @@ def vcell_hcs_cost(assignment, hc_sizes, child_sizes,
                    child_num_cols, join_conditions):
     """
         Calculate shuffle cost of a virtual server assignment.
+        Return:
+            total communication cost
+            the max workload per worker
         Argument:
             assignment - a partition of virtual server
             child_sizes - sizes of input relations
             child_num_cols - num of cols of input relations
             join_conditions - join condition map, equal classes of joined cols
     """
-    assert sum(len(part) for part in assignment) == reduce(mul, hc_sizes, 1)
+    phys_server_num = sum(len(part) for part in assignment)
+    assert phys_server_num == reduce(mul, hc_sizes, 1)
     # 1. compute reversed index and vs_rs_map
     r_index = reversed_index(child_num_cols, join_conditions)
     vs_rs_map = dict()
     for i, partition in enumerate(assignment):
         for vs in partition:
             vs_rs_map[vs] = i
+    rs_wl = [0.0] * phys_server_num                     # a counter per server
     # 2. compute shuffle cost of each relation
-    cost = 0.0
     for i, cols in enumerate(r_index):
         # get subcube dims and their sizes
         subc_dims = sorted([order for order in cols if order != -1])
@@ -140,13 +144,15 @@ def vcell_hcs_cost(assignment, hc_sizes, child_sizes,
         voxel_wl = child_sizes[i]/float(num_voxels)     # workload per voxel
         shuffle_ranges = [range(s) for s in subc_sizes]
         broadcast_ranges = [range(s) for s in un_joined_sizes]
+        voxels_in_rs = [set() for rs in range(phys_server_num)]
         for vox_coor in itertools.product(*shuffle_ranges):
-            rs = set()
             for brcst_coor in itertools.product(*broadcast_ranges):
                 idx_coor = zip(subc_dims, vox_coor) + zip(
                     un_joined_dims, brcst_coor)
                 coor = map(itemgetter(1), sorted(idx_coor))
                 vs = coordinate_to_vs(coor, hc_sizes)
-                rs.add(vs_rs_map[vs])
-            cost += len(rs) * voxel_wl
-    return cost
+                rs_index = vs_rs_map[vs]
+                if vox_coor not in voxels_in_rs[rs_index]:
+                    rs_wl[rs_index] += voxel_wl
+                    voxels_in_rs[rs_index].add(vox_coor)
+    return sum(rs_wl), max(rs_wl)

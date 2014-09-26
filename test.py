@@ -113,11 +113,11 @@ class TestOpimizerFunctions(unittest.TestCase):
         assignment_2 = [(2, 5), (1, 4), (0, 3), (6, 7)]
         child_num_cols = [2, 2, 2]
         hc_sizes = [2, 4]
-        r1 = vcell_hcs_cost(
+        r1, max_wl = vcell_hcs_cost(
             assignment_1, hc_sizes, child_sizes,
             child_num_cols, join_conditions)
         assert r1 == 450
-        r2 = vcell_hcs_cost(
+        r2, max_wl = vcell_hcs_cost(
             assignment_2, hc_sizes, child_sizes,
             child_num_cols, join_conditions)
         assert r2 == 550
