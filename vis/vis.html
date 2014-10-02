@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+  shape-rendering: crispEdges;
+}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+    var width = 800,    // width of the figure
+        height = 800,   // height of the figure 
+        marginSize = 2; // cell margin size
+
+    var physServerNum = 64; //physical server number
+    
+    var colors = ["red", "yellow", "blue", "green"];
+    var severLabels = ["1", "2", "3", "4"];
+
+    var partition = [
+       [20, 51, 22, 46, 54, 13, 14, 26, 49, 38, 61, 28, 60, 16, 27, 56], 
+       [5, 11, 31, 53, 0, 4, 7, 2, 59, 42, 41, 18, 45, 12, 52, 9], 
+       [37, 29, 34, 48, 10, 8, 63, 36, 1, 19, 55, 35, 39, 50, 3, 24], 
+       [21, 33, 58, 43, 25, 47, 44, 6, 23, 40, 32, 57, 17, 15, 30, 62]
+    ];
+     
+    var allocation = [];
+    for(i = 0; i < physServerNum; i++){
+        allocation.push([0, 0, 0]); // x coordinate, y coordinate, assigned rs
+    }
+    for(i = 0; i < partition.length; i++){
+        var cells = partition[i];
+        for(j = 0; j < cells.length; j++){
+            vs_num = cells[j];
+            x = Math.floor(vs_num / 8);  //hardcoded, only work if cell number is 64
+            y = vs_num % 8;    //also hardcoded
+            allocation[ vs_num ] = [x, y, i];
+        }
+    }
+
+    console.log(allocation);
+
+    var maxX = d3.max(allocation, function(d){ return d[0]; });
+    var maxY = d3.max(allocation, function(d){ return d[1]; });
+
+    console.log(maxX);
+
+    var xScale = d3.scale.linear()
+                        .domain([0, maxX])
+                        .range([0, 600]);
+
+    var yScale = d3.scale.linear()
+                        .domain([0, maxY])
+                        .range([0, 600]);
+
+    var svg = d3.select("body").append("svg")
+                    .attr("width", width)
+                    .attr("height", height);
+
+    svg.selectAll("rect")
+            .data(allocation)
+            .enter()
+            .append("rect")
+            .attr("x", function(d, i){
+                return 10 + d[0] * marginSize + xScale(d[0]);
+            })
+            .attr("y", function(d, i){
+                return 10 + d[1] * marginSize + yScale(d[1]);
+            })
+            .attr("width", xScale(1))
+            .attr("height", yScale(1))
+            .attr("fill", function(d, i){
+                return colors[d[2]];
+            });
+
+</script>
