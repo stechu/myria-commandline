@@ -3,7 +3,7 @@
 <style>
 
 body {
-  font: 10px sans-serif;
+  font: 16px sans-serif;
   shape-rendering: crispEdges;
 }
 
@@ -74,7 +74,7 @@ body {
     //set y axis scale
     var yAxisScale = d3.scale.linear()
                         .domain([0, maxY+1])
-                        .range([0, 700]);
+                        .range([700, 0]);
 
     // create x axis at the bottom
     var xAxis = d3.svg.axis()
