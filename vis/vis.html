@@ -7,13 +7,22 @@ body {
   shape-rendering: crispEdges;
 }
 
+.axis path,
+
+.axis line{
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
 </style>
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
-    var width = 800,    // width of the figure
-        height = 800,   // height of the figure 
-        marginSize = 2; // cell margin size
+    var width = 800,     // width of the figure
+        height = 800,    // height of the figure 
+        marginSize = 2,  // cell margin size
+        leftMargin = 20; // left margin
 
     var physServerNum = 64; //physical server number
     
@@ -48,24 +57,44 @@ body {
 
     console.log(maxX);
 
+    // set x scale
     var xScale = d3.scale.linear()
                         .domain([0, maxX])
                         .range([0, 600]);
 
+    // set y scale
     var yScale = d3.scale.linear()
                         .domain([0, maxY])
                         .range([0, 600]);
+    // set x axis scale
+    var xAxisScale = d3.scale.linear()
+                        .domain([0, maxX+1])
+                        .range([0, 700]);
+
+    //set y axis scale
+    var yAxisScale = d3.scale.linear()
+                        .domain([0, maxY+1])
+                        .range([0, 700]);
+
+    // create x axis at the bottom
+    var xAxis = d3.svg.axis()
+                    .scale(xAxisScale)
+                    .orient("bottom");
+    var yAxis = d3.svg.axis()
+                    .scale(yAxisScale)
+                    .orient("left");
 
     var svg = d3.select("body").append("svg")
                     .attr("width", width)
                     .attr("height", height);
 
+    // draw the rectangles
     svg.selectAll("rect")
             .data(allocation)
             .enter()
             .append("rect")
             .attr("x", function(d, i){
-                return 10 + d[0] * marginSize + xScale(d[0]);
+                return leftMargin + d[0] * marginSize + xScale(d[0]);
             })
             .attr("y", function(d, i){
                 return 10 + d[1] * marginSize + yScale(d[1]);
@@ -75,5 +104,14 @@ body {
             .attr("fill", function(d, i){
                 return colors[d[2]];
             });
+
+    // add axies to svg
+    var xAxisYOffset = 10 + xScale(maxY+1) + maxY * marginSize;
+    svg.append("g")
+        .attr("transform", "translate("+leftMargin+","+ xAxisYOffset+")")
+        .call(xAxis);
+    svg.append("g")
+        .attr("transform", "translate("+leftMargin+", 10)")
+        .call(yAxis);
 
 </script>
