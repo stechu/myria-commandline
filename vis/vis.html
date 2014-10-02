@@ -3,7 +3,7 @@
 <style>
 
 body {
-  font: 16px sans-serif;
+  font: 20px sans-serif;
   shape-rendering: crispEdges;
 }
 
@@ -12,6 +12,7 @@ body {
 .axis line{
     fill: none;
     stroke: black;
+    stroke-width: 3;
     shape-rendering: crispEdges;
 }
 
@@ -26,8 +27,8 @@ body {
 
     var physServerNum = 64; //physical server number
     
-    var colors = ["red", "yellow", "blue", "green"];
-    var severLabels = ["1", "2", "3", "4"];
+    var colors = ["red", "brown", "blue", "green"];
+    var serverLabels = ["1", "2", "3", "4"];
 
     var partition = [
        [20, 51, 22, 46, 54, 13, 14, 26, 49, 38, 61, 28, 60, 16, 27, 56], 
@@ -105,12 +106,37 @@ body {
                 return colors[d[2]];
             });
 
+    // add label text
+    svg.selectAll("text")
+        .data(allocation)
+        .enter().append("text")
+        .attr("x", function(d, i){
+                return leftMargin + d[0] * marginSize + xScale(d[0]);
+            })
+        .attr("y", function(d, i){
+            return 10 + d[1] * marginSize + yScale(d[1]);
+        })
+        .attr("dx", function(d, i){
+            return xScale(1)/2;
+        })
+        .attr("dy", function(d, i){
+            return yScale(1)/2;
+        })
+        .attr("text-anchor", "begin")
+        .attr("font-size", 18)
+        .attr("fill", "white")
+        .text(function(d, i){
+            return serverLabels[ d[2] ];
+        });
+
     // add axies to svg
     var xAxisYOffset = 10 + xScale(maxY+1) + maxY * marginSize;
     svg.append("g")
+        .attr("class", "axis")
         .attr("transform", "translate("+leftMargin+","+ xAxisYOffset+")")
         .call(xAxis);
     svg.append("g")
+        .attr("class", "axis")
         .attr("transform", "translate("+leftMargin+", 10)")
         .call(yAxis);
 
