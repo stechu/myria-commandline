@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import csv
 
+
 bar_width = 0.6
 xstick_offset = 0.3
 
@@ -15,6 +16,7 @@ font = {
 matplotlib.rc('font', **font)
 dpi = plt.figure().dpi
 matplotlib.rcParams.update({'figure.autolayout': True})
+colors = ['#5da5da', '#faa43a', '#60bd68', '#f17cb0', '#f15854']
 
 
 def to_float(str):
@@ -29,7 +31,7 @@ def plot_wc_time(algebras, time, std, output_name):
     assert len(std) == len(time)
     ind = np.arange(len(time))  # the x locations for the groups
     fig, ax = plt.subplots()
-    ax.bar(ind, time, width=bar_width, color='m', yerr=std)
+    ax.bar(ind, time, width=bar_width, color=colors, yerr=std)
     ax.set_ylabel('Time (sec)')
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
@@ -45,7 +47,7 @@ def plot_cpu_time(algebras, time, output_name):
     assert len(algebras) == len(time)
     ind = np.arange(len(time))  # the x locations for the groups
     fig, ax = plt.subplots()
-    ax.bar(ind, time, width=bar_width, color='m')
+    ax.bar(ind, time, width=bar_width, color=colors)
     ax.set_ylabel('Time (sec)')
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
@@ -61,7 +63,7 @@ def plot_shuffle_skew(algebras, skews, output_name):
     assert len(algebras) == len(skews)
     ind = np.arange(len(skews))  # the x locations for the groups
     fig, ax = plt.subplots()
-    ax.bar(ind, skews, width=bar_width, color='m')
+    ax.bar(ind, skews, width=bar_width, color=colors)
     ax.set_ylabel('Skew (max/avg)')
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
@@ -77,7 +79,7 @@ def plot_shuffle_size(algebras, shuffle_size, output_name):
     assert len(algebras) == len(shuffle_size)
     ind = np.arange(len(shuffle_size))  # the x locations for the groups
     fig, ax = plt.subplots()
-    ax.bar(ind, shuffle_size, width=bar_width, color='m')
+    ax.bar(ind, shuffle_size, width=bar_width, color=colors)
     ax.set_ylabel('Tuples shuffled (million)')
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
@@ -93,7 +95,7 @@ def plot_output_skew(algebras, skews, output_name):
     assert len(algebras) == len(skews)
     ind = np.arange(len(skews))  # the x locations for the groups
     fig, ax = plt.subplots()
-    ax.bar(ind, skews, width=bar_width, color='m')
+    ax.bar(ind, skews, width=bar_width, color=colors)
     ax.set_ylabel('Skew (max/avg)')
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
@@ -108,7 +110,7 @@ def plot_hashtable_size(algebras, htsizes, output_name):
     assert len(algebras) == len(htsizes)
     ind = np.arange(len(htsizes))  # the x locations for the groups
     fig, ax = plt.subplots()
-    ax.bar(ind, htsizes, width=bar_width, color='m')
+    ax.bar(ind, htsizes, width=bar_width, color=colors)
     ax.set_ylabel('Memory usage (MB)')
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
