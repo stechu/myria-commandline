@@ -7,7 +7,7 @@ import csv
 
 
 bar_width = 0.6
-xstick_offset = 0.3
+xstick_offset = 0.4
 
 font = {
     'family': 'serif',
@@ -17,7 +17,7 @@ matplotlib.rc('font', **font)
 dpi = plt.figure().dpi
 matplotlib.rcParams.update({'figure.autolayout': True})
 # http://www.mulinblog.com/a-color-palette-optimized-for-data-visualization/
-colors = ['#5da5da', '#faa43a', '#60bd68', '#f17cb0', '#f15854']
+colors = ['#5da5da', '#faa43a', '#60bd68', '#f17cb0', '#b2912f', '#b276b2']
 path = "/Users/chushumo/Project/papers/2015-multiwayjoin/images"
 
 
@@ -33,7 +33,7 @@ def plot_wc_time(algebras, time, std, output_name, colors=colors):
     assert len(std) == len(time)
     ind = np.arange(len(time))  # the x locations for the groups
     fig, ax = plt.subplots()
-    ax.bar(ind, time, width=bar_width, color=colors, yerr=std)
+    ax.bar(ind+0.1, time, width=bar_width, color=colors, yerr=std)
     ax.set_ylabel('Time (sec)')
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
@@ -49,7 +49,7 @@ def plot_cpu_time(algebras, time, output_name, colors=colors):
     assert len(algebras) == len(time)
     ind = np.arange(len(time))  # the x locations for the groups
     fig, ax = plt.subplots()
-    ax.bar(ind, time, width=bar_width, color=colors)
+    ax.bar(ind+0.1, time, width=bar_width, color=colors)
     ax.set_ylabel('Time (sec)')
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
@@ -81,7 +81,7 @@ def plot_shuffle_size(algebras, shuffle_size, output_name, colors=colors):
     assert len(algebras) == len(shuffle_size)
     ind = np.arange(len(shuffle_size))  # the x locations for the groups
     fig, ax = plt.subplots()
-    ax.bar(ind, shuffle_size, width=bar_width, color=colors)
+    ax.bar(ind+0.1, shuffle_size, width=bar_width, color=colors)
     ax.set_ylabel('Tuples shuffled (million)')
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
@@ -124,8 +124,8 @@ def plot_hashtable_size(algebras, htsizes, output_name, colors=colors):
 def plot():
     fname = "csvs/SIGMOD Experiment - summary.csv"
     agbrs = ('RS_HJ', 'HC_HJ', 'BR_HJ', 'RS_TJ', 'HC_TJ', 'BR_TJ')
-    # queries = ('triangle',  'clique', 'fb_q1')
-    queries = ('fb_q5')
+    queries = ('triangle',  'clique', 'fb_q1')
+    # queries = ('fb_q5')
     with open(fname, "rU") as f:
         csvreader = csv.reader(f)
         data = [r for r in csvreader]
