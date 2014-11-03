@@ -57,6 +57,20 @@ def hypercube_shuffle():
             client.execute_json(query)
 
 
+def hypercube_shuffle_q4():
+    """
+    Only hypercube shuffle
+    """
+    json_query_files = [
+        "q4_hc_1.json", "q4_hc_2.json", "q4_hc_3.json", "q4_hc_4.json",
+        "q4_hc_5.json", "q4_hc_6.json", "q4_hc_7.json", "q4_hc_8.json"]
+    for query_file_path in json_query_files:
+        with open(query_file_path) as jf:
+            query = json.load(jf)
+            print "executing query {}".format(query_file_path)
+            client.execute_json(query)
+
+
 def random_order_lfj(log_file_name, orders):
     with open("q1_local_lfj.json") as f:
         json_query = json.load(f)

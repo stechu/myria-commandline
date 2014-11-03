@@ -52,7 +52,10 @@ def scl_plot():
     ax.set_ylabel('Speed up')
     ax.set_yscale('log', basey=2)
     ax.set_xticklabels(workers)
-    ax.legend((line1[0], line2[0], line3[0]), ('RS_HJ', 'HC_TJ', 'opt.'))
+    ax.legend(
+        (line1[0], line2[0], line3[0]),
+        ('RS_HJ', 'HC_TJ', 'opt.'),
+        prop={'size': 15})
     ofile_name = "{}/scalability_time.pdf".format(
         path)
     print "outputing {}".format(ofile_name)
@@ -88,5 +91,5 @@ def scl_plot_resource():
 
 
 if __name__ == '__main__':
-    #scl_plot()
-    scl_plot_resource()
+    scl_plot()
+    #scl_plot_resource()
