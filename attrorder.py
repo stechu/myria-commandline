@@ -7,6 +7,8 @@ import csv
 import json
 import pickle
 import os.path
+from q4_sample_orders import q4_sample_orders, q4_tables
+import q3
 
 
 # threshold of heavyhitters, fraction of total number of rows
@@ -142,19 +144,15 @@ def change_order(json_query, order):
     return json_query, new_join_map, new_sort_order
 
 
-def get_and_save_table_info():
+def get_and_save_table_info(table_list, profile_log_fname):
     """
     Run this before at least once before change input data
     """
-    table_list = [
-        "table1.csv", "table2.csv", "table3.csv", "table4.csv",
-        "table5.csv", "table6.csv", "table7.csv", "table8.csv"
-    ]
     if os.path.isfile("rel.info"):
-        rel_info = pickle.load(open("rel.info", "rb"))
+        rel_info = pickle.load(open(profile_log_fname, "rb"))
     else:
         rel_info = extract_info(table_list)
-        pickle.dump(rel_info, open("rel.info", "wb"))
+        pickle.dump(rel_info, open(profile_log_fname, "wb"))
     return rel_info
 
 
@@ -166,7 +164,7 @@ def examine_orders():
     print "------------- join map --------------"
     for e in join_map:
         print e
-    rel_info = get_and_save_table_info()
+    rel_info = get_and_save_table_info(q3.q3_tables, "rel_q3.info")
     print "------------ table stats ------------"
     for e in rel_info:
         print e["value_cnt"], e["rows"]
@@ -174,17 +172,13 @@ def examine_orders():
     print cost_no_hh(join_map, sort_order, rel_info)
 
 
-def a():
-    orders = [
-        (5, 0, 4, 1, 2, 3),
-        (4, 0, 2, 5, 1, 3),
-        (3, 2, 0, 4, 5, 1)]
-    with open("q1_local_lfj.json") as f:
+def q4():
+    with open("q4_local_tj.json") as f:
         json_query = json.load(f)
-    for order in orders:
+    for order in q4_sample_orders:
         query, join_map, sort_order = change_order(json_query, order)
-        rel_info = get_and_save_table_info()
-        print cost_no_hh(join_map, sort_order, rel_info)
+        rel_info = get_and_save_table_info(q4_tables, "rel.info")
+        print order, cost_no_hh(join_map, sort_order, rel_info)
 
 if __name__ == "__main__":
-    print optimal_order()
+    q4()

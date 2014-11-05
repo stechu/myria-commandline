@@ -4,6 +4,7 @@ import attrorder
 import itertools
 import random
 import csv
+from q4_sample_orders import q4_sample_orders
 
 
 hostname = "dbserver02.cs.washington.edu"
@@ -39,7 +40,7 @@ sampled_orders_2 = [
 
 def sample_orders(size, join_arity):
     all_order = list(itertools.permutations(list(range(join_arity))))
-    idx = [random.randint(0, 719) for i in range(size)]
+    idx = [random.randint(0, 40319) for i in range(size)]
     return [all_order[i] for i in idx]
 
 
@@ -57,22 +58,8 @@ def hypercube_shuffle():
             client.execute_json(query)
 
 
-def hypercube_shuffle_q4():
-    """
-    Only hypercube shuffle
-    """
-    json_query_files = [
-        "q4_hc_1.json", "q4_hc_2.json", "q4_hc_3.json", "q4_hc_4.json",
-        "q4_hc_5.json", "q4_hc_6.json", "q4_hc_7.json", "q4_hc_8.json"]
-    for query_file_path in json_query_files:
-        with open(query_file_path) as jf:
-            query = json.load(jf)
-            print "executing query {}".format(query_file_path)
-            client.execute_json(query)
-
-
-def random_order_lfj(log_file_name, orders):
-    with open("q1_local_lfj.json") as f:
+def random_order_lfj(query_file, log_file_name, orders):
+    with open(query_file) as f:
         json_query = json.load(f)
 
     with open(log_file_name, "wb") as f:
@@ -80,7 +67,6 @@ def random_order_lfj(log_file_name, orders):
         csvwriter.writerow(["query_id", "order", "time", "success or fail"])
         for order in orders:
             json_query, a, b = attrorder.change_order(json_query, order)
-            # json_query["profilingMode"] = 'QUERY' # profile query
             print "execute leapfrog join with order {}".format(order)
             result, status = client.execute_json(json_query)
             # log experiment result
@@ -105,5 +91,7 @@ def execute_original_query():
 
 
 if __name__ == '__main__':
-    execute_original_query()
-    #random_order_lfj("single_machine_3.csv", sampled_orders_2)
+    #execute_original_query()
+    random_order_lfj(
+        "q4_local_tj.json", "q4_single_machine_1.csv", q4_sample_orders[20:])
+    #print sample_orders(30, 8)

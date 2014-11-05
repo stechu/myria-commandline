@@ -10,6 +10,15 @@ def pretty_json(obj):
     return json.dumps(obj, sort_keys=True, indent=4, separators=(',', ':'))
 
 
+def round_down(fnumber):
+    """ round down smartly
+    """
+    if math.ceil(fnumber) - fnumber < 0.001:
+        return math.ceil(fnumber)
+    else:
+        return math.floor(fnumber)
+
+
 def reversed_index(child_num_cols, join_conditions):
     """ Return reverse index of join_conditions.
         r_index[i][j] -> k, j-th column of i-th child is in k-th
@@ -92,7 +101,10 @@ def frac_dim_sizes(num_server, child_sizes, child_num_cols, join_conditions):
     # the solution is in log scale, recover it
     dim_sizes = [math.pow(num_server, x) for x in logs]
     r_index = reversed_index(child_num_cols, join_conditions)
-    return (workload(dim_sizes, child_sizes, r_index), dim_sizes)
+    frac_wl = workload(dim_sizes, child_sizes, r_index)
+    round_dim_sizes = [int(round_down(d)) for d in dim_sizes]
+    round_wl = workload(round_dim_sizes, child_sizes, r_index)
+    return (frac_wl, dim_sizes, round_wl, round_dim_sizes)
 
 
 def coordinate_to_vs(coordinate, hc_sizes):

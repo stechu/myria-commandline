@@ -54,7 +54,7 @@ def scl_plot():
     ax.set_xticklabels(workers)
     ax.legend(
         (line1[0], line2[0], line3[0]),
-        ('RS_HJ', 'HC_TJ', 'opt.'),
+        ('HC_TJ', 'RS_HJ', 'opt.'),
         prop={'size': 15})
     ofile_name = "{}/scalability_time.pdf".format(
         path)
