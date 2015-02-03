@@ -5,7 +5,7 @@ import csv
 from plot import to_float
 
 """
-    Q4 has missing data, so it worth specical treatment.
+    some queries may fail, so it worth specical treatment.
 """
 
 bar_width = 0.6

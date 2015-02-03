@@ -25,6 +25,18 @@ def to_float(str):
     return float(str.replace(',', ''))
 
 
+def to_label(f):
+    """
+        convert a float to a label that makes sense
+    """
+    if f < 0.1:
+        return "%.2f" % f
+    elif f < 1.0:
+        return "%.1f" % f
+    else:
+        return "%d" % int(f)
+
+
 def plot_wc_time(algebras, time, std, output_name, query, colors=colors):
     """
     Plot wall clock time
@@ -78,7 +90,7 @@ def plot_cpu_time(algebras, time, output_name, query, colors=colors):
         height = rect.get_height()
         ax.text(
             rect.get_x()+rect.get_width()/2.,
-            1.05*height, '%d' % int(height),
+            1.05*height, to_label(height),
             ha='center', va='bottom')
     print "outputing {}".format(output_name)
     plt.savefig(output_name, format='pdf', dpi=dpi)
@@ -116,7 +128,7 @@ def plot_shuffle_size(algebras, shuffle_size, output_name, query, colors=colors)
         height = rect.get_height()
         ax.text(
             rect.get_x()+rect.get_width()/2.,
-            1.05*height, '%d' % int(height),
+            1.05*height, to_label(height),
             ha='center', va='bottom')
     print "outputing {}".format(output_name)
     plt.savefig(output_name, format='pdf', dpi=dpi)

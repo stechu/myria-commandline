@@ -58,7 +58,30 @@ def cost_no_hh(join_map, sort_order, rel_info, heavy_hitter="no"):
         cost - a float number indicating the cost of current join order
     """
     if heavy_hitter == "no":
-        return cost_no_hh_recursive(join_map, sort_order, rel_info, 0)
+        old = cost_no_hh_recursive(join_map, sort_order, rel_info, 0)
+        new = cost_new_no_hh_recursive(join_map, sort_order, rel_info, 0)
+        return old, new
+
+
+def cost_new_no_hh_recursive(join_map, sort_order, rel_info, cur_pos):
+    # do the estimation at current level
+    sizes = []
+    for table, col in join_map[cur_pos]:
+        table_info = rel_info[table]
+        if sort_order[table].index(col) == 0:
+            sizes.append(table_info["value_cnt"][col])
+        else:
+            assert table_info["arity"] == 2
+            other_col = 1 if col == 0 else 0
+            est_size = table_info["rows"]/float(
+                table_info["value_cnt"][other_col])
+            sizes.append(est_size)
+    # print sizes
+    if cur_pos + 1 < len(join_map):
+        return min(sizes) + min(sizes) * cost_no_hh_recursive(
+            join_map, sort_order, rel_info, cur_pos+1)
+    else:
+        return min(sizes)
 
 
 def cost_no_hh_recursive(join_map, sort_order, rel_info, cur_pos):
@@ -178,7 +201,17 @@ def q4():
     for order in q4_sample_orders:
         query, join_map, sort_order = change_order(json_query, order)
         rel_info = get_and_save_table_info(q4_tables, "rel.info")
-        print order, cost_no_hh(join_map, sort_order, rel_info)
+        print cost_no_hh(join_map, sort_order, rel_info)
+
+
+def q4_new():
+    with open("q4_local_tj.json") as f:
+        json_query = json.load(f)
+    for order in q4_sample_orders:
+        query, join_map, sort_order = change_order(json_query, order)
+        rel_info = get_and_save_table_info(q4_tables, "rel.info")
+        old, new = cost_no_hh(join_map, sort_order, rel_info)
+        print new
 
 if __name__ == "__main__":
-    q4()
+    q4_new()
