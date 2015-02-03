@@ -18,7 +18,7 @@ dpi = plt.figure().dpi
 matplotlib.rcParams.update({'figure.autolayout': True})
 # http://www.mulinblog.com/a-color-palette-optimized-for-data-visualization/
 colors = ['#5da5da', '#faa43a', '#60bd68', '#f17cb0', '#b2912f', '#b276b2']
-path = "/Users/chushumo/Project/papers/2015-multiwayjoin/images"
+path = "/Users/chushumo/Project/papers/2015-multiwayjoin-revision/images"
 
 
 def to_float(str):
@@ -54,7 +54,6 @@ def plot_wc_time(algebras, time, std, output_name, query, colors=colors):
                 rect.get_x()+rect.get_width()/2.,
                 1.05*height, '%.1f' % height,
                 ha='center', va='bottom')
-    print "outputing {}".format(output_name)
     print "outputing {}".format(output_name)
     plt.savefig(output_name, format='pdf', dpi=dpi)
 
@@ -227,7 +226,7 @@ def plot():
 def plot_extra_queries():
     fname = "csvs/SIGMOD Experiment - summary.csv"
     agbrs = ('RS_HJ', 'HC_HJ', 'BR_HJ', 'RS_TJ', 'HC_TJ', 'BR_TJ')
-    queries = ('rectangle',  'two_rings', 'fb_q3', 'fb_q4')
+    queries = ('two_rings', 'fb_q3', 'fb_q4')
     with open(fname, "rU") as f:
         csvreader = csv.reader(f)
         data = [r for r in csvreader]

@@ -93,5 +93,5 @@ def execute_original_query():
 if __name__ == '__main__':
     #execute_original_query()
     random_order_lfj(
-        "q4_local_tj.json", "q4_single_machine_1.csv", q4_sample_orders[20:])
+        "q4_local_tj.json", "q4_single_machine_1.csv", q4_sample_orders[29:])
     #print sample_orders(30, 8)

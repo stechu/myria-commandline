@@ -18,12 +18,12 @@ colors = ['#5da5da', '#faa43a', '#60bd68', '#f17cb0', '#b2912f', '#b276b2']
 path = "/Users/chushumo/Project/papers/2015-multiwayjoin/images"
 
 
-def max_workload_plot():
+def max_workload_plot(fname, ofname):
     """
         Plot the maximum workload per server using different HC configs
     """
     # read data from csv
-    with open("./csvs/SIGMOD Experiment - hcs_config.csv", "rU") as f:
+    with open("csvs/{}".format(fname), "rU") as f:
         csvreader = csv.reader(f)
         data = [list(row) for row in csvreader]
 
@@ -52,7 +52,7 @@ def max_workload_plot():
         bars.append(rect)
 
     # set labels
-    ax.set_ylabel("Optimal Ratio")
+    ax.set_ylabel("Workload to optimal ratio")
     ax.set_xticks(ind+bar_width*2)
     ax.set_xticklabels(("Q1", "Q2", "Q3", "Q4"))
     ax.set_ylim((0, 7))
@@ -71,7 +71,7 @@ def max_workload_plot():
         ('Our Alg.', 'Round Down', 'Random(4096 cells)'),
         prop={'size': 15})
 
-    output_path = "{}/hcs_max_workload.pdf".format(path)
+    output_path = "{}/{}".format(path, ofname)
     print "outputing {}".format(output_path)
     plt.savefig(output_path, format='pdf', dpi=dpi)
 
@@ -117,5 +117,7 @@ def total_shuffle_plot():
     plt.savefig(output_path, format='pdf', dpi=dpi)
 
 if __name__ == "__main__":
-    max_workload_plot()
+    max_workload_plot("SIGMOD Experiment - hcs_config_63.csv", "hcs_63.pdf")
+    max_workload_plot("SIGMOD Experiment - hcs_config_64.csv", "hcs_64.pdf")
+    max_workload_plot("SIGMOD Experiment - hcs_config_65.csv", "hcs_65.pdf")
     #total_shuffle_plot()

@@ -91,5 +91,5 @@ def scl_plot_resource():
 
 
 if __name__ == '__main__':
-    scl_plot()
-    #scl_plot_resource()
+    #scl_plot()
+    scl_plot_resource()

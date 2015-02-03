@@ -133,13 +133,13 @@ r4 = scan(perform_film); -- 1,094,294
 r5 = scan(director_film); -- 190,820
 r6 = scan(director_film); -- 190,820
 -- query(x) :- r1(x,p1),r2(x,p2),r3(p1,f1),r4(p2,f2),r5(d,f1),r6(d,f2)
-query = [from  r5, r3, r4, r6, r1, r2
+query = [from  r6, r5, r4, r3, r2, r1
          where r1.$0 = r2.$0 and
                r1.$1 = r3.$0 and
                r2.$1 = r4.$0 and
                r3.$1 = r5.$1 and
                r4.$1 = r6.$1 and
-               r5.$1 = r6.$1 and
+               r5.$0 = r6.$0 and
                r5.$1 > r6.$1
          emit r1.$0 as x, r5.$0 as y];
 -- Store
