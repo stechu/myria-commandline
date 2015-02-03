@@ -25,7 +25,7 @@ def to_float(str):
     return float(str.replace(',', ''))
 
 
-def plot_wc_time(algebras, time, std, output_name, colors=colors):
+def plot_wc_time(algebras, time, std, output_name, query, colors=colors):
     """
     Plot wall clock time
     """
@@ -33,27 +33,54 @@ def plot_wc_time(algebras, time, std, output_name, colors=colors):
     assert len(std) == len(time)
     ind = np.arange(len(time))  # the x locations for the groups
     fig, ax = plt.subplots()
-    ax.bar(ind+0.1, time, width=bar_width, color=colors, yerr=std)
+    rects = ax.bar(ind+0.1, time, width=bar_width, color=colors, yerr=std)
     ax.set_ylabel('Time (sec)')
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
+    if query == "triangle":
+        ax.set_ylim((0, 16))
+    elif query == "clique":
+        ax.set_ylim((0, 64))
+    for rect in rects:
+        height = rect.get_height()
+        if query == "triangle":
+            ax.text(
+                rect.get_x()+rect.get_width()/2.,
+                height+1, '%.1f' % height,
+                ha='center', va='bottom')
+        else:
+            ax.text(
+                rect.get_x()+rect.get_width()/2.,
+                1.05*height, '%.1f' % height,
+                ha='center', va='bottom')
+    print "outputing {}".format(output_name)
     print "outputing {}".format(output_name)
     plt.savefig(output_name, format='pdf', dpi=dpi)
 
 
-def plot_cpu_time(algebras, time, output_name, colors=colors):
+def plot_cpu_time(algebras, time, output_name, query, colors=colors):
     """
     Plot cpu time
     """
     assert len(algebras) == len(time)
     ind = np.arange(len(time))  # the x locations for the groups
     fig, ax = plt.subplots()
-    ax.bar(ind+0.1, time, width=bar_width, color=colors)
+    rects = ax.bar(ind+0.1, time, width=bar_width, color=colors)
     ax.set_ylabel('Time (sec)')
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
+    if query == "triangle":
+        ax.set_ylim((0, 260))
+    elif query == "fb_q1":
+        ax.set_ylim((0, 6500))
+    for rect in rects:
+        height = rect.get_height()
+        ax.text(
+            rect.get_x()+rect.get_width()/2.,
+            1.05*height, '%d' % int(height),
+            ha='center', va='bottom')
     print "outputing {}".format(output_name)
     plt.savefig(output_name, format='pdf', dpi=dpi)
 
@@ -74,18 +101,24 @@ def plot_shuffle_skew(algebras, skews, output_name, colors=colors):
     plt.savefig(output_name, format='pdf', dpi=dpi)
 
 
-def plot_shuffle_size(algebras, shuffle_size, output_name, colors=colors):
+def plot_shuffle_size(algebras, shuffle_size, output_name, query, colors=colors):
     """
     Plot shuffle size
     """
     assert len(algebras) == len(shuffle_size)
     ind = np.arange(len(shuffle_size))  # the x locations for the groups
     fig, ax = plt.subplots()
-    ax.bar(ind+0.1, shuffle_size, width=bar_width, color=colors)
+    rects = ax.bar(ind+0.1, shuffle_size, width=bar_width, color=colors)
     ax.set_ylabel('Tuples shuffled (million)')
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
+    for rect in rects:
+        height = rect.get_height()
+        ax.text(
+            rect.get_x()+rect.get_width()/2.,
+            1.05*height, '%d' % int(height),
+            ha='center', va='bottom')
     print "outputing {}".format(output_name)
     plt.savefig(output_name, format='pdf', dpi=dpi)
 
@@ -138,7 +171,9 @@ def plot():
                     time.append(to_float(row[2]))
                     std.append(to_float(row[3]))
             plot_wc_time(
-                agbrs, time, std, "{}/{}_wall_time.pdf".format(path, query))
+                agbrs, time,
+                std, "{}/{}_wall_time.pdf".format(path, query),
+                query)
 
         # output cpu time
         for query in queries:
@@ -147,7 +182,8 @@ def plot():
                 if row[0] == query:
                     time.append(to_float(row[8]))
             plot_cpu_time(
-                agbrs, time, "{}/{}_cpu_time.pdf".format(path, query))
+                agbrs, time, "{}/{}_cpu_time.pdf".format(path, query),
+                query)
 
         # output shuffle skew
         # for query in queries:
@@ -165,8 +201,9 @@ def plot():
                 if row[0] == query:
                     shuffle_sizes.append(to_float(row[10]))
             plot_shuffle_size(
-                agbrs, shuffle_sizes, "{}/{}_shuffle_size.pdf".format(
-                    path, query))
+                agbrs, shuffle_sizes,
+                "{}/{}_shuffle_size.pdf".format(path, query),
+                query)
 
         # output output skew
         #for query in queries:
@@ -186,5 +223,46 @@ def plot():
         #    plot_hashtable_size(
         #        agbrs, htsizes, "{}_memory.pdf".format(query))
 
+
+def plot_extra_queries():
+    fname = "csvs/SIGMOD Experiment - summary.csv"
+    agbrs = ('RS_HJ', 'HC_HJ', 'BR_HJ', 'RS_TJ', 'HC_TJ', 'BR_TJ')
+    queries = ('rectangle',  'two_rings', 'fb_q3', 'fb_q4')
+    with open(fname, "rU") as f:
+        csvreader = csv.reader(f)
+        data = [r for r in csvreader]
+        # output wall clock time
+        for query in queries:
+            time = []
+            std = []
+            for row in data:
+                if row[0] == query:
+                    time.append(to_float(row[2]))
+                    std.append(to_float(row[3]))
+            plot_wc_time(
+                agbrs, time,
+                std, "{}/{}_wall_time.pdf".format(path, query),
+                query)
+
+        # output cpu time
+        for query in queries:
+            time = []
+            for row in data:
+                if row[0] == query:
+                    time.append(to_float(row[8]))
+            plot_cpu_time(
+                agbrs, time, "{}/{}_cpu_time.pdf".format(path, query),
+                query)
+
+        for query in queries:
+            shuffle_sizes = []
+            for row in data:
+                if row[0] == query:
+                    shuffle_sizes.append(to_float(row[10]))
+            plot_shuffle_size(
+                agbrs, shuffle_sizes,
+                "{}/{}_shuffle_size.pdf".format(path, query),
+                query)
+
 if __name__ == '__main__':
-    plot()
+    plot_extra_queries()
