@@ -30,8 +30,10 @@ def to_label(f):
         convert a float to a label that makes sense
     """
     if f < 0.1:
-        return "%.2f" % f
+        return "%.3f" % f
     elif f < 1.0:
+        return "%.2f" % f
+    elif f < 10.0:
         return "%.1f" % f
     else:
         return "%d" % int(f)
@@ -64,7 +66,7 @@ def plot_wc_time(algebras, time, std, output_name, query, colors=colors):
         else:
             ax.text(
                 rect.get_x()+rect.get_width()/2.,
-                1.05*height, '%.1f' % height,
+                1.05*height, to_label(height),
                 ha='center', va='bottom')
     print "outputing {}".format(output_name)
     plt.savefig(output_name, format='pdf', dpi=dpi)

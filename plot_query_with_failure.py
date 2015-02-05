@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import csv
 from plot import to_float
+from plot import to_label
 
 """
     some queries may fail, so it worth specical treatment.
@@ -20,11 +21,11 @@ dpi = plt.figure().dpi
 matplotlib.rcParams.update({'figure.autolayout': True})
 # http://www.mulinblog.com/a-color-palette-optimized-for-data-visualization/
 colors = ['#5da5da', '#faa43a', '#60bd68', '#f17cb0', '#b2912f', '#b276b2']
-path = "/Users/chushumo/Project/papers/2015-multiwayjoin/images"
-query = "fb_q5"
+path = "/Users/chushumo/Project/papers/2015-multiwayjoin-revision/images"
+query = "rectangle"
 
 
-def plot_q4_runtime(algebras, data, output_name):
+def plot_runtime(algebras, data, output_name):
     # plot wall clock time
     runtime = []    # query runtime
     std = []        # standard deviation
@@ -39,7 +40,7 @@ def plot_q4_runtime(algebras, data, output_name):
     ax.set_ylabel('Time (sec)')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
-    ax.set_ylim((0, 14000))
+    ax.set_ylim((0, 250))
     # label the bars
     for rect in rects:
         height = rect.get_height()
@@ -51,13 +52,13 @@ def plot_q4_runtime(algebras, data, output_name):
         else:
             ax.text(
                 rect.get_x()+rect.get_width()/2.,
-                1.05*height, '%d' % int(height),
+                1.05*height, to_label(height),
                 ha='center', va='bottom')
     print "outputing {}".format(output_name)
     plt.savefig(output_name, format='pdf', dpi=dpi)
 
 
-def plot_q4_cpu(algebras, data, output_name):
+def plot_cpu(algebras, data, output_name):
     # plot wall clock time
     cputime = []    # query cputime
     for row in data:
@@ -70,7 +71,7 @@ def plot_q4_cpu(algebras, data, output_name):
     ax.set_ylabel('CPU Time (sec)')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
-    ax.set_ylim((0, 290000))
+    ax.set_ylim((0, 2500))
     # label the bars
     for rect in rects:
         height = rect.get_height()
@@ -82,13 +83,13 @@ def plot_q4_cpu(algebras, data, output_name):
         else:
             ax.text(
                 rect.get_x()+rect.get_width()/2.,
-                1.05*height, '%d' % int(height),
+                1.05*height, to_label(height),
                 ha='center', va='bottom')
     print "outputing {}".format(output_name)
     plt.savefig(output_name, format='pdf', dpi=dpi)
 
 
-def plot_q4_shuffle(algebras, data, output_name):
+def plot_shuffle(algebras, data, output_name):
     shuffle_size = []
     for row in data:
         if row[0] == query:
@@ -100,7 +101,7 @@ def plot_q4_shuffle(algebras, data, output_name):
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
-    ax.set_ylim((0, 16000))
+    ax.set_ylim((0, 2300))
     # label the bar
     for rect in rects:
         height = rect.get_height()
@@ -112,7 +113,7 @@ def plot_q4_shuffle(algebras, data, output_name):
         else:
             ax.text(
                 rect.get_x()+rect.get_width()/2.,
-                1.05*height, '%d' % int(height),
+                1.05*height, to_label(height),
                 ha='center', va='bottom')
     print "outputing {}".format(output_name)
     plt.savefig(output_name, format='pdf', dpi=dpi)
@@ -124,11 +125,11 @@ def plot():
     with open(fname, "rU") as f:
         csvreader = csv.reader(f)
         data = [r for r in csvreader]
-    plot_q4_runtime(agbrs, data, "{}/{}_wall_time.pdf".format(
+    plot_runtime(agbrs, data, "{}/{}_wall_time.pdf".format(
         path, query))
-    plot_q4_cpu(agbrs, data, "{}/{}_cpu_time.pdf".format(
+    plot_cpu(agbrs, data, "{}/{}_cpu_time.pdf".format(
         path, query))
-    plot_q4_shuffle(agbrs, data, "{}/{}_shuffle_size.pdf".format(
+    plot_shuffle(agbrs, data, "{}/{}_shuffle_size.pdf".format(
         path, query))
 
 
