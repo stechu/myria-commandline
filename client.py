@@ -2,21 +2,21 @@
 
 import requests
 
-from raco.language.myrialang import (MyriaLeftDeepTreeAlgebra,
-                                     MyriaHyperCubeAlgebra,
-                                     MyriaHyperCubeLeftDeepTreeJoinAlgebra,
-                                     MyriaRegularShuffleLeapFrogAlgebra,
-                                     MyriaBroadcastLeftDeepTreeJoinAlgebra,
-                                     MyriaBroadCastLeapFrogJoinAlgebra,
-                                     compile_to_json)
+from raco.language.myrialang import *
 from raco.catalog import Catalog
 from raco import scheme
 from raco.algebra import DEFAULT_CARDINALITY
 from threading import Lock
 from raco.myrial import parser as MyrialParser
 from raco.myrial import interpreter as MyrialInterpreter
+from raco.relation_key import RelationKey
 
 import myria
+import json
+
+
+def pretty_json(obj):
+    return json.dumps(obj, sort_keys=True, indent=4, separators=(',', ':'))
 
 # We need a (global) lock on the Myrial parser because yacc is not Threadsafe.
 # .. see uwescience/datalogcompiler#39
@@ -177,6 +177,20 @@ def execute_json(json_query):
     except requests.ConnectionError as e:
         print e
         return 'fail', 'ConnectionError'
+
+
+def execute_physical_plan(phys_str, logical_plan="LP", raw_query='query'):
+    """
+    Execute physical plan
+    Argument:
+        phys_str: physical plan string
+    """
+    physical_plan = eval(phys_str)
+    json_plan = compile_to_json(
+        str(raw_query), str(logical_plan), physical_plan)
+    json_plan["profilingMode"] = "QUERY"
+    print pretty_json(json_plan)
+    execute_json(json_plan)
 
 
 def init_connection(hostname, port):
