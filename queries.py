@@ -16,7 +16,10 @@ query = [from R, R as S, R as T, R as P
        where R.$1 = S.$0 and
              S.$1 = T.$0 and
              T.$1 = P.$0 and
-             P.$1 = R.$0
+             P.$1 = R.$0 and
+             R.$0 < R.$1 and
+             S.$0 < S.$1 and
+             T.$0 < T.$1
        emit R.$0 as x, S.$0 as y, S.$1 as z, T.$1 as p];
 '''
 

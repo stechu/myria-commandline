@@ -10,9 +10,14 @@ from threading import Lock
 from raco.myrial import parser as MyrialParser
 from raco.myrial import interpreter as MyrialInterpreter
 from raco.relation_key import RelationKey
+from raco import expression
+from raco.expression import UnnamedAttributeRef
+from raco import types
 
 import myria
 import json
+
+nar = UnnamedAttributeRef
 
 
 def pretty_json(obj):
@@ -190,7 +195,7 @@ def execute_physical_plan(phys_str, logical_plan="LP", raw_query='query'):
         str(raw_query), str(logical_plan), physical_plan)
     json_plan["profilingMode"] = "QUERY"
     print pretty_json(json_plan)
-    execute_json(json_plan)
+    return execute_json(json_plan)
 
 
 def init_connection(hostname, port):
