@@ -199,5 +199,5 @@ def execute_physical_plan(phys_str, logical_plan="LP", raw_query='query'):
 
 
 def init_connection(hostname, port):
-        global connection
-        connection = myria.MyriaConnection(hostname=hostname, port=port)
+    global connection
+    connection = myria.MyriaConnection(hostname=hostname, port=port)

@@ -88,6 +88,10 @@ def plot_cpu_time(algebras, time, output_name, query, colors=colors):
         ax.set_ylim((0, 260))
     elif query == "fb_q1":
         ax.set_ylim((0, 6500))
+    elif query == "fb_q4":
+        ax.set_ylim((0, 6000))
+    elif query == "fb_q3":
+        ax.set_ylim((0, 80))
     for rect in rects:
         height = rect.get_height()
         ax.text(
@@ -123,6 +127,10 @@ def plot_shuffle_size(algebras, shuffle_size, output_name, query, colors=colors)
     fig, ax = plt.subplots()
     rects = ax.bar(ind+0.1, shuffle_size, width=bar_width, color=colors)
     ax.set_ylabel('Tuples shuffled (million)')
+    if query == "two_rings":
+        ax.set_ylim((0, 160))
+    elif query == "fb_q4":
+        ax.set_ylim((0, 280))
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
@@ -169,7 +177,7 @@ def plot_hashtable_size(algebras, htsizes, output_name, colors=colors):
 
 def plot():
     fname = "csvs/SIGMOD Experiment - summary.csv"
-    agbrs = ('RS_HJ', 'HC_HJ', 'BR_HJ', 'RS_TJ', 'HC_TJ', 'BR_TJ')
+    agbrs = ('RS_HJ', 'RS_TJ', 'BR_HJ', 'BR_TJ', 'HC_HJ', 'HC_TJ')
     queries = ('triangle',  'clique', 'fb_q1')
     # queries = ('fb_q5')
     with open(fname, "rU") as f:
@@ -239,7 +247,7 @@ def plot():
 
 def plot_extra_queries():
     fname = "csvs/SIGMOD Experiment - summary.csv"
-    agbrs = ('RS_HJ', 'HC_HJ', 'BR_HJ', 'RS_TJ', 'HC_TJ', 'BR_TJ')
+    agbrs = ('RS_HJ', 'RS_TJ', 'BR_HJ', 'BR_TJ', 'HC_HJ', 'HC_TJ')
     queries = ('two_rings', 'fb_q3', 'fb_q4')
     with open(fname, "rU") as f:
         csvreader = csv.reader(f)
@@ -278,4 +286,5 @@ def plot_extra_queries():
                 query)
 
 if __name__ == '__main__':
+    plot()
     plot_extra_queries()

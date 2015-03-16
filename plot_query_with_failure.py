@@ -22,7 +22,7 @@ matplotlib.rcParams.update({'figure.autolayout': True})
 # http://www.mulinblog.com/a-color-palette-optimized-for-data-visualization/
 colors = ['#5da5da', '#faa43a', '#60bd68', '#f17cb0', '#b2912f', '#b276b2']
 path = "/Users/chushumo/Project/papers/2015-multiwayjoin-revision/images"
-query = "rectangle"
+query = "fb_q5"
 
 
 def plot_runtime(algebras, data, output_name):
@@ -40,7 +40,8 @@ def plot_runtime(algebras, data, output_name):
     ax.set_ylabel('Time (sec)')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
-    ax.set_ylim((0, 250))
+    if query == "fb_q5":
+        ax.set_ylim((0, 14000))
     # label the bars
     for rect in rects:
         height = rect.get_height()
@@ -48,7 +49,7 @@ def plot_runtime(algebras, data, output_name):
             ax.text(
                 rect.get_x()+rect.get_width()/2.,
                 1.05*height, "FAIL",
-                ha='center', va='bottom')
+                ha='center', va='bottom', color='red')
         else:
             ax.text(
                 rect.get_x()+rect.get_width()/2.,
@@ -71,7 +72,8 @@ def plot_cpu(algebras, data, output_name):
     ax.set_ylabel('CPU Time (sec)')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
-    ax.set_ylim((0, 2500))
+    if query == "fb_q5":
+        ax.set_ylim((0, 280000))
     # label the bars
     for rect in rects:
         height = rect.get_height()
@@ -79,7 +81,7 @@ def plot_cpu(algebras, data, output_name):
             ax.text(
                 rect.get_x()+rect.get_width()/2.,
                 1.05*height, "FAIL",
-                ha='center', va='bottom')
+                ha='center', va='bottom', color='red')
         else:
             ax.text(
                 rect.get_x()+rect.get_width()/2.,
@@ -101,7 +103,8 @@ def plot_shuffle(algebras, data, output_name):
     # ax.set_xlabel('Physical Algebra')
     ax.set_xticks(ind+xstick_offset)
     ax.set_xticklabels(algebras)
-    ax.set_ylim((0, 2300))
+    if query == "fb_q5":
+        ax.set_ylim((0, 17000))
     # label the bar
     for rect in rects:
         height = rect.get_height()
@@ -109,7 +112,7 @@ def plot_shuffle(algebras, data, output_name):
             ax.text(
                 rect.get_x()+rect.get_width()/2.,
                 1.05*height, "FAIL",
-                ha='center', va='bottom')
+                ha='center', va='bottom', color='red')
         else:
             ax.text(
                 rect.get_x()+rect.get_width()/2.,
@@ -121,7 +124,7 @@ def plot_shuffle(algebras, data, output_name):
 
 def plot():
     fname = "csvs/SIGMOD Experiment - summary.csv"
-    agbrs = ('RS_HJ', 'HC_HJ', 'BR_HJ', 'RS_TJ', 'HC_TJ', 'BR_TJ')
+    agbrs = ('RS_HJ', 'RS_TJ', 'BR_HJ', 'BR_TJ', 'HC_HJ', 'HC_TJ')
     with open(fname, "rU") as f:
         csvreader = csv.reader(f)
         data = [r for r in csvreader]

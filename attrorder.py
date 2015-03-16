@@ -126,7 +126,7 @@ def change_order(json_query, order):
     Arguments:
         - order: a new order (permutation)
     """
-    lfj_pos = 16    # NOTE: this is hardcoded!
+    lfj_pos = 12    # NOTE: this is hardcoded!
     jfm = "joinFieldMapping"
     ops = json_query["plan"]["fragments"][0]["operators"]
     assert ops[lfj_pos]["opType"] == "LeapFrogJoin"
@@ -213,5 +213,40 @@ def q4_new():
         old, new = cost_no_hh(join_map, sort_order, rel_info)
         print new
 
+
+def q7():
+    tables = [
+        "csvs/[public#adhoc#oscar].csv",
+        "csvs/[public#adhoc#q7_r2_shuffled].csv",
+        "csvs/[public#adhoc#q7_r3_shuffled].csv",
+        "csvs/[public#adhoc#q7_r4_shuffled].csv"
+    ]
+    orders = [(0, 1), (1, 0)]
+    with open("q7_lfj_local.json") as f:
+        json_query = json.load(f)
+    for order in orders:
+        query, join_map, sort_order = change_order(json_query, order)
+        rel_info = get_and_save_table_info(tables, "rel.info")
+        old, new = cost_no_hh(join_map, sort_order, rel_info)
+        print new
+
+
+def q8(order):
+    tables = [
+        "csvs/[public#adhoc#q8_r6_shuffled].csv",
+        "csvs/[public#adhoc#q8_r4_shuffled].csv",
+        "csvs/[public#adhoc#q8_r2_shuffled].csv",
+        "csvs/[public#adhoc#q8_r1_shuffled].csv",
+        "csvs/[public#adhoc#q8_r3_shuffled].csv",
+        "csvs/[public#adhoc#q8_r5_shuffled].csv",
+    ]
+    with open("q8_lfj_local.json") as f:
+        json_query = json.load(f)
+    query, join_map, sort_order = change_order(json_query, order)
+    rel_info = get_and_save_table_info(tables, "rel.info")
+    old, new = cost_no_hh(join_map, sort_order, rel_info)
+    return new
+
 if __name__ == "__main__":
-    q4_new()
+    order = (4, 2, 0, 5, 1, 3)
+    print q8(order)
